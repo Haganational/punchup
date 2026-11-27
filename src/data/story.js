@@ -5,6 +5,7 @@ const MATEO = { who: 'new-mexico', name: 'MATEO' };
 const GREG = { who: 'mount-st-marys', name: 'FATHER GREG' };
 const TESSA = { who: 'toledo', name: 'TESSA' };
 const GARY = { who: 'bowling-green', name: 'GARY' };
+const HANNAH = { who: 'ball-state', name: 'HANNAH' };
 const say = (speaker, text) => ({ ...speaker, text });
 const tell = (text) => ({ who: 'narrator', text });
 
@@ -44,16 +45,35 @@ export const CHAPTERS = [
       ] },
     ],
   },
+  {
+    title: 'CHAPTER 3', sub: 'HEAVY LIFTING',
+    panels: [
+      { bg: 'dawn', place: 'SUNRISE ON THE LAKE', lines: [
+        say(GARY, 'YOU HAVE GOT THE HANDS, KID. AND THE CHEEKBONES. USE THEM WISELY.'),
+        say(TESSA, 'TEAM BREAKFAST? I KNOW A MARKET WITH A SAUSAGE STAND THAT WILL CHANGE YOUR LIFE.'),
+        say(MATEO, 'TWO DOWN. WHO IS NEXT, FATHER?'),
+        say(GREG, 'HANNAH LINDQVIST, OF BALL STATE. THEY SAY SHE BENCH PRESSES THE NEWS VAN.'),
+      ] },
+      { bg: 'market', place: 'THE MARKET HALL', lines: [
+        tell('UNDER THE CLOCK TOWER, A WOMAN CURLS A WHEEL OF CHEESE IN EACH HAND.'),
+        say(HANNAH, 'SANDOVAL. I WATCHED YOU FIGHT GARY. NICE FOOTWORK. NICER TRUNKS.'),
+        say(MATEO, 'THEY ARE SEQUINED. BY HAND.'),
+        say(HANNAH, 'I WILL TRY NOT TO DENT THEM. NO PROMISES ABOUT THE REST OF YOU.'),
+        say(TESSA, 'IS IT WRONG THAT I WANT TO WATCH THIS AND ALSO EAT A SAUSAGE?'),
+        say(GREG, 'IT IS CLEVELAND, CHILD. THAT IS THE WHOLE POINT.'),
+      ] },
+    ],
+  },
 ];
 
 export const ENDING = {
   title: 'TO BE CONTINUED', sub: 'THE CIRCUIT ROLLS ON',
   panels: [
-    { bg: 'dawn', place: 'SUNRISE ON THE LAKE', lines: [
-      say(GARY, 'YOU HAVE GOT THE HANDS, KID. AND THE CHEEKBONES. USE THEM WISELY.'),
-      say(TESSA, 'TEAM BREAKFAST? I KNOW A MARKET WITH A SAUSAGE STAND THAT WILL CHANGE YOUR LIFE.'),
-      say(MATEO, 'TWO DOWN. WHO IS NEXT, FATHER?'),
-      say(GREG, 'HANNAH LINDQVIST, OF BALL STATE. THEY SAY SHE BENCH PRESSES THE NEWS VAN.'),
+    { bg: 'lake', place: 'THE LAKEFRONT, MIDNIGHT', lines: [
+      say(HANNAH, 'NOBODY HAS PUT ME DOWN SINCE THE VAN ROLLED BACK ON ME IN MUNCIE. I LIKE YOU.'),
+      say(TESSA, 'GET IN LINE.'),
+      say(MATEO, 'THREE DOWN. WHO IS LEFT, FATHER?'),
+      say(GREG, 'RAY ABERNATHY. AND THEN THE BOSS HIMSELF, TREVOR HOLLOWAY. THEY SAY HE HAS NEVER BLINKED ON AIR.'),
       say(MATEO, '...I AM GOING TO NEED MORE SEQUINS.'),
     ] },
   ],

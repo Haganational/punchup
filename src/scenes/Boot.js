@@ -5,6 +5,8 @@ import headMateo from '../assets/heads/new-mexico.png';
 import headGreg from '../assets/heads/mount-st-marys.png';
 import portraitMateo from '../assets/portraits/new-mexico.png';
 import portraitTessa from '../assets/portraits/toledo.png';
+import headHannah from '../assets/heads/ball-state.png';
+import portraitHannah from '../assets/portraits/ball-state.png';
 import headGary from '../assets/heads/bowling-green.png';
 import portraitGary from '../assets/portraits/bowling-green.png';
 import { ROSTER } from '../data/roster.js';
@@ -22,6 +24,8 @@ const IMAGES = {
   'portrait_new-mexico': portraitMateo,
   portrait_toledo: portraitTessa,
   'head_bowling-green': headGary,
+  'head_ball-state': headHannah,
+  'portrait_ball-state': portraitHannah,
   'portrait_bowling-green': portraitGary,
 };
 

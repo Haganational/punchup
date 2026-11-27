@@ -30,6 +30,8 @@ const BASE = { lx: 0, ly: 0, ls: 1, rx: 0, ry: 0, rs: 1, bx: 0, by: 0, tilt: 0, 
 const pose = (name) => ({ ...BASE, ...POSES[name] });
 
 const PUNCH_IMPACT = 90;
+const LEAD_IMPACT = 70;     // the lead hand is the quick jab
+const REAR_IMPACT = 108;    // the rear hand is slower and hits harder
 const PUNCH_TOTAL = 240;
 const DODGE_MIN = 340;      // a tap keeps Mateo safe this long
 const DODGE_HOLD = 680;     // holding the direction keeps him leaning out this long
@@ -65,6 +67,9 @@ export class Player {
       skin: 0xd09060, outline: 0x804820, cuff: 0xbcbcbc,
     };
     this.tintT = 0;
+    this.lead = 'L';            // orthodox: left hand leads. Switch with the stance button.
+    this.st = -1;
+    this.sw = 1;
     this.fullReset();
   }
 
@@ -129,6 +134,12 @@ export class Player {
     const wantPunch = controls.justDown('punchL') ? 'L' : controls.justDown('punchR') ? 'R' : null;
     const zone = controls.isDown('up') ? 'head' : 'body';
 
+    if (controls.justDown('stance') && (this.state === 'idle' || this.state === 'block')) {
+      this.lead = this.lead === 'L' ? 'R' : 'L';
+      this.hopT = 160;
+      audio.dodge();
+    }
+
     switch (this.state) {
       case 'idle':
         if (wantDuck) this.startDuck();
@@ -149,7 +160,7 @@ export class Player {
         break;
 
       case 'punch':
-        if (!this.resolved && this.t >= PUNCH_IMPACT) {
+        if (!this.resolved && this.t >= (this.hand === this.lead ? LEAD_IMPACT : REAR_IMPACT)) {
           this.resolved = true;
           this.scene.playerPunch(this.hand, this.zone);
           if (this.state !== 'punch') break;
@@ -351,16 +362,22 @@ export class Player {
     if (this.state === 'uppercut' && this.t > 240 && this.t < 520) bounce = -7 * Math.sin((Math.PI * (this.t - 240)) / 280);
     const sway = idle ? Math.sin(this.clock / 190) * 1.5 : 0;
     const c = this.cur;
-    this.c.setAngle(c.tilt * (1 - f) + this.fallDir * 80 * f + stagger);
+    // Stance: lead glove reaches toward the opponent, rear glove stays home by the chin.
+    const sk = 1 - Math.exp((-dt / 1000) * 10);
+    this.st += ((this.lead === 'L' ? -1 : 1) - this.st) * sk;
+    this.sw += ((idle || this.state === 'block' ? 1 : 0) - this.sw) * sk;
+    const s = this.st * this.sw;
+    if (this.hopT > 0) { this.hopT -= dt; bounce -= 4 * Math.sin((Math.PI * Math.max(0, this.hopT)) / 160); }
+    this.c.setAngle((c.tilt + 3 * s) * (1 - f) + this.fallDir * 80 * f + stagger);
     this.c.setScale(c.z);
     this.c.setPosition(
       Math.round(this.baseX + c.bx + this.fallDir * 14 * f),
       Math.round(this.baseY + c.by + idleBob + pant + bounce + f * 34 + bounceY),
     );
-    const lx = c.lx; const ly = c.ly + sway;
-    const rx = c.rx; const ry = c.ry - sway;
-    this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);
-    this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
+    const lx = c.lx - 3 * s; const ly = c.ly + sway + 5 * s;
+    const rx = c.rx - 3 * s; const ry = c.ry - sway - 5 * s;
+    this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls * (1 + 0.08 * s));
+    this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs * (1 - 0.08 * s));
 
     // Motion trail on a punch.
     const upper = this.state === 'uppercut' && this.t > 180 && this.t < 430;

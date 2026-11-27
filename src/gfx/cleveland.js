@@ -137,6 +137,37 @@ export function makeCleveland(scene) {
     for (let x = 20; x < W; x += 40) r('#585060', x, 126, 14, 1);
   });
 
+  // ---- The market hall and its clock tower ----
+  canvas(scene, 'bg_market', W, BH, (r, ctx) => {
+    const rand = rng(1912);
+    sky(r, [['#3c8ce8', 26], ['#68b0f8', 24], ['#a4d4fc', 22], ['#d8ecfc', 20]]);
+    [[20, 12], [120, 22], [200, 8]].forEach(([x, y]) => { r('#fcfcfc', x, y, 26, 5); r('#fcfcfc', x + 6, y - 3, 14, 4); });
+    const brick = '#d8a038'; const brickDk = '#a87018'; const brickLt = '#f8c868';
+    // the long hall with its great arched window
+    r(brick, 0, 52, 190, 66); r(brickLt, 0, 52, 190, 2);
+    for (let i = 0; i < 40; i++) r(brick, 55 + i, 52 - Math.round(Math.sqrt(1600 - (i - 40) * (i - 40)) * 0.6), 2 * (40 - i), 2);
+    for (let y = 58; y < 118; y += 5) for (let x = (y % 10 ? 0 : 4); x < 190; x += 9) r(brickDk, x, y, 6, 1);
+    r('#284868', 70, 44, 50, 46); r('#284868', 76, 36, 38, 10); r('#284868', 84, 31, 22, 6);
+    for (let x = 70; x < 120; x += 8) r(brickLt, x, 31, 1, 59); for (let y = 44; y < 90; y += 9) r(brickLt, 70, y, 50, 1);
+    r('#70a8d8', 78, 46, 6, 7); r('#70a8d8', 94, 37, 6, 7); r('#70a8d8', 102, 55, 6, 7);
+    // clock tower with a green copper cap
+    r(brick, 204, 26, 30, 92); r(brickLt, 204, 26, 2, 92); r(brickDk, 232, 26, 2, 92);
+    for (let y = 60; y < 118; y += 5) r(brickDk, 208 + ((y / 5) % 2) * 6, y, 6, 1);
+    r('#fcfcfc', 211, 34, 16, 16); r('#fcfcfc', 213, 32, 12, 20); r('#181818', 218, 36, 2, 7); r('#181818', 219, 41, 5, 2);
+    r('#58a888', 202, 20, 34, 6); r('#58a888', 206, 14, 26, 6); r('#58a888', 212, 8, 14, 6); r('#58a888', 217, 2, 4, 6); r('#388868', 202, 25, 34, 1);
+    // stalls: striped awnings, crates of produce and strings of sausages
+    r('#585048', 0, 118, W, 32); r('#787068', 0, 118, W, 1);
+    [[4, '#e40058'], [70, '#00a844'], [136, '#f8b800'], [200, '#0078f8']].forEach(([x, col], n) => {
+      for (let i = 0; i < 9; i++) r(i % 2 ? '#fcfcfc' : col, x + i * 6, 92, 6, 9);
+      r('#fcfcfc', x, 101, 54, 1); r('#383028', x + 2, 102, 2, 28); r('#383028', x + 50, 102, 2, 28);
+      r('#805020', x + 4, 118, 46, 14); r('#603810', x + 4, 118, 46, 1);
+      const goods = [['#e40058', '#f83800', '#00b800'], ['#f8d878', '#f8b800', '#fce0a8'], ['#00b800', '#f83800', '#6844fc'], ['#f87858', '#fcfcfc', '#f8d878']][n];
+      for (let i = 0; i < 26; i++) r(goods[Math.floor(rand() * 3)], x + 6 + Math.floor(rand() * 42), 112 + Math.floor(rand() * 6), 3, 3);
+      if (n % 2 === 0) for (let i = 0; i < 6; i++) { r('#a03020', x + 8 + i * 7, 103, 3, 7); r('#c85038', x + 8 + i * 7, 104, 1, 4); r('#fcf0c0', x + 9 + i * 7, 102, 1, 1); }
+    });
+    word(ctx, font, 'MARKET', 71, 64, '#fcf0c0');
+  });
+
   // ---- Sunrise over the lake ----
   canvas(scene, 'bg_dawn', W, BH, (r) => {
     const rand = rng(77);

@@ -133,7 +133,7 @@ export class Fight extends Phaser.Scene {
       a.setFlipX(Math.random() < 0.5).setAngle(Math.random() < 0.5 ? 0 : 90).setScale(hot && Math.random() < 0.4 ? 2 : 1);
       if (Math.random() < 0.3) a.setTint(0xfcfcfc);
       this.time.delayedCall(hot ? 70 : 50, () => a.destroy());
-    } else if (kind === 'ember') {
+    } else if (kind === 'ember' || kind === 'rose') {
       a.setScale(hot && Math.random() < 0.4 ? 2 : 1);
       this.tweens.add({ targets: a, y: y - (hot ? 22 : 12), x: x + Math.random() * 8 - 4, alpha: 0, duration: hot ? 420 : 520, onComplete: () => a.destroy() });
     } else {
@@ -148,7 +148,8 @@ export class Fight extends Phaser.Scene {
   }
 
   playerPunch(hand, zone) {
-    const base = zone === 'head' ? TUNE.punchHead : TUNE.punchBody;
+    // The rear hand is slower but lands a little harder.
+    const base = (zone === 'head' ? TUNE.punchHead : TUNE.punchBody) + (hand !== this.player.lead ? 1 : 0);
     const result = this.opponent.receivePunch(hand, zone, base);
     const x = W / 2 + (hand === 'L' ? -5 : 5);
     const y = zone === 'head' ? 100 : 140;

@@ -36,7 +36,21 @@ export class Opponent {
     const key = data.key;
 
     this.c = scene.add.container(x, y).setDepth(10);
-    this.legs = scene.add.image(0, 32, `legs_${key}`).setOrigin(0.5, 0);
+    // The legs texture is cut into trunks and two separate legs so the feet can
+    // stagger into a real boxing stance and bounce independently.
+    const legsTex = scene.textures.get(`legs_${key}`);
+    if (!legsTex.has('trunks')) {
+      legsTex.add('trunks', 0, 0, 0, 42, 20);
+      legsTex.add('legL', 0, 0, 19, 21, 25);
+      legsTex.add('legR', 0, 21, 19, 21, 25);
+    }
+    this.legL = scene.add.image(-21, 51, `legs_${key}`, 'legL').setOrigin(0, 0);
+    this.legR = scene.add.image(0, 51, `legs_${key}`, 'legR').setOrigin(0, 0);
+    this.trunks = scene.add.image(-21, 32, `legs_${key}`, 'trunks').setOrigin(0, 0);
+    this.stance = Math.random() < 0.5 ? -1 : 1;   // +1: the glove on screen-right leads
+    this.st = this.stance;                        // smoothed stance, for fluid switches
+    this.sw = 1;                                  // how much of the stance shows right now
+    this.stanceT = 3000;
     this.torso = scene.add.image(0, -10, `torso_${key}`).setOrigin(0.5, 0);
     this.head = scene.add.image(0, -3, `head_${key}_o`).setOrigin(0.5, 1);
     this.arms = scene.add.graphics();
@@ -47,7 +61,7 @@ export class Opponent {
     this.padL = scene.add.image(-23, 0, `pad_${key}`);
     this.padR = scene.add.image(23, 0, `pad_${key}`).setFlipX(true);
     this.auraT = 0;
-    this.c.add([this.legs, this.torso, this.arms, this.padL, this.padR, this.head, ...this.dizzy, this.gl, this.gr]);
+    this.c.add([this.legL, this.legR, this.trunks, this.torso, this.arms, this.padL, this.padR, this.head, ...this.dizzy, this.gl, this.gr]);
     this.ghostT = 0;
 
     this.cur = pose('guardHigh');
@@ -106,7 +120,9 @@ export class Opponent {
   }
 
   chooseMove() {
-    if (this.quickNext) return Math.random() < 0.5 ? 'jabL' : 'jabR';
+    // Jabs always come from the lead hand, so the stance tells you which side.
+    const leadJab = this.stance > 0 ? 'jabR' : 'jabL';
+    if (this.quickNext) return leadJab;
     const w = { ...this.round.weights };
     if (this.hp / this.d.hp < 0.4 && w.signature != null) w.signature += 2;
     if (this.lastMove === 'signature') w.signature = 0;
@@ -114,9 +130,9 @@ export class Opponent {
     let roll = Math.random() * total;
     for (const [name, weight] of Object.entries(w)) {
       roll -= weight;
-      if (roll <= 0) return name;
+      if (roll <= 0) return name === 'jabL' || name === 'jabR' ? leadJab : name;
     }
-    return 'jabL';
+    return leadJab;
   }
 
   startMove(name) {
@@ -157,6 +173,14 @@ export class Opponent {
         if (this.guardT <= 0) { this.guard = this.guard === 'high' ? 'low' : 'high'; this.resetGuardTimer(); }
         if (this.blockShow > 0) this.blockShow -= dt;
         else this.setPose(this.guard === 'high' ? 'guardHigh' : 'guardLow', 12);
+        // Now and then, hop and switch between orthodox and southpaw.
+        this.stanceT -= dt;
+        if (this.stanceT <= 0) {
+          const [sa, sb] = this.d.stanceSwitchMs || [2400, 5200];
+          this.stanceT = sa + Math.random() * (sb - sa);
+          this.stance = -this.stance;
+          this.kick.by = -5;
+        }
         this.idleT -= dt;
         if (this.idleT <= 0) this.startMove(this.chooseMove());
         break;
@@ -426,21 +450,35 @@ export class Opponent {
     const nod = this.state === 'tell' && this.move && this.move.nod ? Math.round(Math.abs(Math.sin(this.t / 90)) * 4) : 0;
     const c = this.cur;
 
-    const angle = c.tilt * (1 - f) + this.fallDir * 86 * f + stagger;
+    // Stance: lead glove out front and low, rear glove tucked by the chin, body
+    // turned, feet staggered. It fades out while punching and comes back after.
+    const sk = 1 - Math.exp((-dt / 1000) * 9);
+    this.st += (this.stance - this.st) * sk;
+    const guardish = ['idle', 'chip', 'recover', 'sidestep'].includes(this.state) ? 1 : this.state === 'tell' ? 0.45 : 0;
+    this.sw += (guardish - this.sw) * sk;
+    const s = this.st * this.sw;
+    const light = idle || this.state === 'tell';
+    const step = Math.sin(this.clock / 150);
+    const shuffle = Math.sin(this.clock / 720) * 5 * this.sw * (1 - f);
+    this.legR.setPosition(Math.round(1.5 * s), Math.round(51 + 3 * s + (light ? Math.min(0, step) * 2 : 0))).setScale(1 + 0.07 * s);
+    this.legL.setPosition(Math.round(-21 + 1.5 * s - 21 * (-0.07 * s)), Math.round(51 - 3 * s + (light ? Math.min(0, -step) * 2 : 0))).setScale(1 - 0.07 * s);
+    this.trunks.x = Math.round(-21 + s);
+
+    const angle = (c.tilt + 2.5 * s) * (1 - f) + this.fallDir * 86 * f + stagger;
     const hop = -12 * Math.sin(Math.PI * Math.min(1, f * 1.4)) * (f < 0.72 ? 1 : 0);
     this.c.setAngle(angle);
     this.c.setScale(c.z * (1 - 0.1 * f));
     this.c.setPosition(
-      Math.round(this.baseX + c.bx * (1 - f) + this.fallDir * 6 * f),
+      Math.round(this.baseX + c.bx * (1 - f) + shuffle + this.fallDir * 6 * f),
       Math.round(this.baseY + c.by + this.kick.by + bob + bounce + f * 44 + hop + bounceY),
     );
-    this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble), Math.round(-3 + c.hy + this.kick.hy + nod));
-    const lx = c.lx + shake; const ly = c.ly + sway;
-    const rx = c.rx - shake; const ry = c.ry - sway;
-    this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);
-    this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
+    this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble + 1.5 * s), Math.round(-3 + c.hy + this.kick.hy + nod));
+    const lx = c.lx + shake + 4 * s; const ly = c.ly + sway - 5 * s;
+    const rx = c.rx - shake + 4 * s; const ry = c.ry - sway + 5 * s;
+    this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls * (1 - 0.12 * s));
+    this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs * (1 + 0.12 * s));
     // The glove closer to the camera draws on top.
-    this.c.bringToTop(c.ls >= c.rs ? this.gl : this.gr);
+    this.c.bringToTop(this.gl.scale >= this.gr.scale ? this.gl : this.gr);
 
     // The "OH!" face shows for a beat after every hit, and while dazed or down.
     if (this.ohT > 0) this.ohT -= dt;

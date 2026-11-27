@@ -12,8 +12,8 @@ const POSES = {
   bodyR: { lx: -20, ly: -2, rx: 6, ry: -46, rs: 0.85, bx: -3, by: -4, tilt: -7, z: 0.97 },
   headL: { lx: -4, ly: -76, ls: 0.75, rx: 20, ry: -2, bx: 3, by: -7, tilt: 8, z: 0.95 },
   headR: { lx: -20, ly: -2, rx: 4, ry: -76, rs: 0.75, bx: -3, by: -7, tilt: -8, z: 0.95 },
-  dodgeL: { lx: -20, ly: -8, rx: 18, ry: -4, bx: -34, by: 5, tilt: -12 },
-  dodgeR: { lx: -18, ly: -4, rx: 20, ry: -8, bx: 34, by: 5, tilt: 12 },
+  dodgeL: { lx: -18, ly: -12, rx: 16, ry: -8, bx: -38, by: 6, tilt: -16 },
+  dodgeR: { lx: -16, ly: -8, rx: 18, ry: -12, bx: 38, by: 6, tilt: 16 },
   hit: { lx: -26, ly: 2, rx: 26, ry: 2, by: 7 },
   winded: { lx: -24, ly: 10, rx: 24, ry: 10, by: 4 },
   upWind: { lx: -20, ly: -8, rx: 28, ry: 16, by: 9, tilt: 10, z: 1.04 },
@@ -27,8 +27,10 @@ const pose = (name) => ({ ...BASE, ...POSES[name] });
 
 const PUNCH_IMPACT = 90;
 const PUNCH_TOTAL = 240;
-const DODGE_SAFE = 300;
-const DODGE_TOTAL = 400;
+const DODGE_MIN = 340;      // a tap keeps Mateo safe this long
+const DODGE_HOLD = 680;     // holding the direction keeps him leaning out this long
+const DODGE_RECOVER = 80;   // time to come back to center
+const BUFFER_MS = 180;      // a dodge pressed slightly early still comes out
 
 export class Player {
   constructor(scene, x, y) {
@@ -67,6 +69,7 @@ export class Player {
   }
 
   roundReset() {
+    this.buffered = null;
     this.gas = TUNE.gasMax;
     this.windedT = 0;
     this.kdRound = 0;
@@ -77,6 +80,7 @@ export class Player {
   get winded() { return this.windedT > 0; }
   setPose(name, rate = 20) { this.target = pose(name); this.rate = rate; }
   toIdle() { this.state = 'idle'; this.t = 0; this.queued = null; }
+  dodgeSafe() { return this.state === 'dodge' && this.dodgeEnd == null; }
 
   spendGas(n) {
     if (this.winded) return;
@@ -103,7 +107,11 @@ export class Player {
       this.windedT -= dt;
       if (this.windedT <= 0) { this.windedT = 0; this.gas = Math.round(TUNE.gasMax / 2); }
     }
-    const wantDodge = controls.justDown('left') ? 'L' : controls.justDown('right') ? 'R' : null;
+    // Remember a dodge press for a moment, so one pressed a hair early still happens.
+    const pressedDodge = controls.justDown('left') ? 'L' : controls.justDown('right') ? 'R' : null;
+    if (pressedDodge) this.buffered = { dir: pressedDodge, ms: BUFFER_MS };
+    else if (this.buffered) { this.buffered.ms -= dt; if (this.buffered.ms <= 0) this.buffered = null; }
+    const wantDodge = this.buffered ? this.buffered.dir : null;
     const wantPunch = controls.justDown('punchL') ? 'L' : controls.justDown('punchR') ? 'R' : null;
     const zone = controls.isDown('up') ? 'head' : 'body';
 
@@ -131,18 +139,33 @@ export class Player {
           if (this.state !== 'punch') break;
         }
         if (wantPunch) this.queued = { hand: wantPunch, zone };
-        if (this.resolved && wantDodge) { this.startDodge(wantDodge); break; }
+        if (wantDodge) { this.startDodge(wantDodge); break; }   // a dodge always beats a punch
         if (this.t >= PUNCH_IMPACT + 50) this.setPose('idle', 22);
         if (this.t >= PUNCH_TOTAL) { const q = this.queued; this.toIdle(); this.queued = q; }
         break;
 
-      case 'dodge':
-        if (this.t >= DODGE_SAFE) this.setPose('idle', 18);
-        if (this.t >= DODGE_TOTAL) this.toIdle();
+      case 'dodge': {
+        // Weave straight into a dodge the other way.
+        if (pressedDodge && pressedDodge !== this.dodgeDir) { this.startDodge(pressedDodge); break; }
+        if (wantPunch) this.queued = { hand: wantPunch, zone };
+        if (this.dodgeEnd == null) {
+          const held = controls.isDown(this.dodgeDir === 'L' ? 'left' : 'right');
+          const oppDone = ['open', 'stunned'].includes(this.scene.opponent.state);
+          const counterNow = this.queued && oppDone && this.t >= 140;
+          if (counterNow || this.t >= DODGE_HOLD || (this.t >= DODGE_MIN && !held)) {
+            this.dodgeEnd = this.t;
+            this.setPose('idle', 26);
+            if (counterNow) { const q = this.queued; this.startPunch(q.hand, q.zone); break; }
+          }
+        } else if (this.t >= this.dodgeEnd + DODGE_RECOVER) {
+          const q = this.queued; this.toIdle(); this.queued = q;
+        }
         break;
+      }
 
       case 'hit':
-        if (this.t >= 380) this.toIdle();
+        if (this.t >= 220 && wantDodge) { this.startDodge(wantDodge); break; }
+        if (this.t >= 340) this.toIdle();
         break;
 
       case 'uppercut':
@@ -175,7 +198,10 @@ export class Player {
     this.state = 'dodge';
     this.t = 0;
     this.queued = null;
-    this.setPose('dodge' + dir, 30);
+    this.buffered = null;
+    this.dodgeDir = dir;
+    this.dodgeEnd = null;
+    this.setPose('dodge' + dir, 34);
     audio.dodge();
   }
 
@@ -192,7 +218,7 @@ export class Player {
   // Called by the opponent when a punch arrives. Returns 'dodged' | 'blocked' | 'hit'.
   takeHit(strike) {
     if (this.state === 'down') return 'dodged';
-    if (this.state === 'dodge' && this.t < DODGE_SAFE) {
+    if (this.dodgeSafe()) {
       this.scene.popup('DODGE!', this.baseX, this.baseY - 44, 0x58f898);
       return 'dodged';
     }

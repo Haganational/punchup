@@ -28,8 +28,8 @@ export class Title extends Phaser.Scene {
     this.prompt = text(this, W / 2, 174, 'PRESS Z TO START', 0xfcfcfc, 0.5);
     text(this, W / 2, 190, 'Z / X  LEFT / RIGHT PUNCH', 0xbcbcbc, 0.5);
     text(this, W / 2, 200, 'HOLD UP TO AIM AT THE HEAD', 0xbcbcbc, 0.5);
-    text(this, W / 2, 210, 'LEFT / RIGHT DODGE  DOWN BLOCK', 0xbcbcbc, 0.5);
-    text(this, W / 2, 220, 'ENTER  STAR UPPERCUT', 0xf8b800, 0.5);
+    text(this, W / 2, 210, 'LEFT / RIGHT DODGE (HOLD = LONGER)', 0xbcbcbc, 0.5);
+    text(this, W / 2, 220, 'DOWN BLOCK   ENTER STAR UPPERCUT', 0xf8b800, 0.5);
     text(this, W / 2, 231, 'M MUTE   ESC PAUSE', 0x7c7c7c, 0.5);
 
     this.blink = 0;

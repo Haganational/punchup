@@ -176,10 +176,10 @@ export class Opponent {
         for (const s of this.strikes) {
           if (!s.launched && this.t >= s.at) {
             s.launched = true;
-            this.setPose(s.hook ? 'hookR' : s.hand === 'L' ? 'strikeL' : 'strikeR', 34);
+            this.setPose(s.hook ? 'hookR' : s.hand === 'L' ? 'strikeL' : 'strikeR', 24);
             audio.swing();
           }
-          if (!s.resolved && this.t >= s.at + 120) {
+          if (!s.resolved && this.t >= s.at + 170) {
             s.resolved = true;
             const result = player.takeHit(s);
             if (result === 'hit') this.landed++;
@@ -189,7 +189,7 @@ export class Opponent {
           }
         }
         const last = this.strikes[this.strikes.length - 1];
-        if (last.resolved && this.t >= last.at + 260) {
+        if (last.resolved && this.t >= last.at + 300) {
           if (this.scene.phase !== 'fight') { this.enterRecover(400); break; }
           if (this.landed > 0) {
             this.enterRecover(520);

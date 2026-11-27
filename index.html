@@ -12,7 +12,12 @@
       #game canvas { image-rendering: pixelated; display: block; }
       #pad { display: none; width: 100%; max-width: 520px; padding: 10px 12px 14px; box-sizing: border-box;
              justify-content: space-between; align-items: center; }
-      body.touch #pad { display: flex; }
+      body.touch #pad { display: flex; flex: 1 1 auto; align-items: stretch; gap: 14px; min-height: 150px; max-height: 360px; max-width: 600px; }
+      body.touch { justify-content: space-evenly; }
+      body.touch .cluster { flex: 1; gap: 8px; }
+      body.touch .dpad { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+      body.touch .fists { grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr 1.5fr; }
+      body.touch #pad button { font-size: clamp(13px, 4.2vw, 22px); }
       .cluster { display: grid; gap: 6px; }
       .dpad { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); }
       .fists { grid-template-columns: repeat(2, 64px); grid-template-rows: 44px 64px; }

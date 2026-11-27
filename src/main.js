@@ -17,8 +17,13 @@ controls.onFirstInput = () => {
 
 // Scale by whole numbers only, so every game pixel stays perfectly square.
 function bestZoom() {
-  const padH = isTouch ? document.getElementById('pad').offsetHeight : 0;
-  const z = Math.min(window.innerWidth / W, (window.innerHeight - padH) / H);
+  // On a phone, fill the full width (leaving room for the buttons) even when
+  // that is not a whole number: a bigger picture matters more than perfect pixels.
+  if (isTouch) {
+    const z = Math.min(window.innerWidth / W, (window.innerHeight - 170) / H);
+    return Math.max(0.5, z >= 2 ? Math.floor(z * 4) / 4 : z);
+  }
+  const z = Math.min(window.innerWidth / W, window.innerHeight / H);
   return Math.max(1, Math.floor(z));
 }
 

@@ -326,10 +326,10 @@ export class Fight extends Phaser.Scene {
     o.add(text(this, W / 2, y, `${d.short}:`, 0xf8b800, 0.5));
     o.add(text(this, W / 2, y + 11, win ? d.lines.lose : d.lines.win, 0xfcfcfc, 0.5).setCenterAlign());
     const next = ROSTER[currentFight(this) + 1];
-    this.canAdvance = win && !!next;
+    this.canAdvance = win;
     const headline = !win ? 'SHAKE IT OFF, MATEO' : next ? `NEXT UP: ${next.name}` : 'MORE FIGHTS COMING SOON';
     o.add(text(this, W / 2, 206, headline, win ? 0x58f898 : 0x3cbcfc, 0.5));
-    o.add(text(this, W / 2, 229, this.canAdvance ? 'Z NEXT FIGHT    X TITLE' : 'Z REMATCH    X TITLE', 0xfcfcfc, 0.5));
+    o.add(text(this, W / 2, 229, this.canAdvance ? 'Z CONTINUE    X TITLE' : 'Z REMATCH    X TITLE', 0xfcfcfc, 0.5));
     this.resultShown = true;
   }
 
@@ -396,7 +396,8 @@ export class Fight extends Phaser.Scene {
         if (this.resultShown) {
           if (controls.justDown('punchL') || controls.justDown('star')) {
             this.resultShown = false;
-            if (this.canAdvance) { this.registry.set('fightIndex', currentFight(this) + 1); this.scene.start('Intro'); }
+            if (this.canAdvance && ROSTER[currentFight(this) + 1]) { this.registry.set('fightIndex', currentFight(this) + 1); this.scene.start('Story'); }
+            else if (this.canAdvance) this.scene.start('Story', { ending: true });
             else this.scene.restart();
           }
           else if (controls.justDown('punchR')) { this.resultShown = false; this.scene.start('Title'); }

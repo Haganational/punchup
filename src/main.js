@@ -5,6 +5,7 @@ import { controls } from './input/controls.js';
 import { Boot } from './scenes/Boot.js';
 import { Fight } from './scenes/Fight.js';
 import { Intro } from './scenes/Intro.js';
+import { Story } from './scenes/Story.js';
 import { Title } from './scenes/Title.js';
 
 const isTouch = controls.attach();
@@ -31,7 +32,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.NONE, zoom: bestZoom() },
   audio: { noAudio: true },
   banner: false,
-  scene: [Boot, Title, Intro, Fight],
+  scene: [Boot, Title, Story, Intro, Fight],
 });
 
 window.addEventListener('resize', () => game.scale.setZoom(bestZoom()));

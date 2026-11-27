@@ -6,7 +6,7 @@ import portraitMateo from '../assets/portraits/new-mexico.png';
 import portraitTessa from '../assets/portraits/toledo.png';
 import tessa from '../data/tessa.js';
 import { registerFont } from '../gfx/text.js';
-import { makeFx, makeMateo, makeOpponentBody, makeRing } from '../gfx/textures.js';
+import { makeFx, makeMateo, makeOpponentBody, makeRing, outlineImage } from '../gfx/textures.js';
 
 // Images are bundled into the page, so they are decoded directly instead of
 // going through the network loader.
@@ -40,6 +40,7 @@ export class Boot extends Phaser.Scene {
     makeFx(this);
     makeMateo(this);
     makeOpponentBody(this, tessa.key, tessa.colors);
+    outlineImage(this, 'head_mount-st-marys');
     this.scene.start('Title');
   }
 }

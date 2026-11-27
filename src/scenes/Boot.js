@@ -7,9 +7,13 @@ import portraitMateo from '../assets/portraits/new-mexico.png';
 import portraitTessa from '../assets/portraits/toledo.png';
 import headHannah from '../assets/heads/ball-state.png';
 import portraitHannah from '../assets/portraits/ball-state.png';
+import headRay from '../assets/heads/ohio.png';
+import portraitRay from '../assets/portraits/ohio.png';
+import headTrevor from '../assets/heads/central-michigan.png';
+import portraitTrevor from '../assets/portraits/central-michigan.png';
 import headGary from '../assets/heads/bowling-green.png';
 import portraitGary from '../assets/portraits/bowling-green.png';
-import { ROSTER } from '../data/roster.js';
+import { ROSTER, loadProgress } from '../data/roster.js';
 import { makeCleveland } from '../gfx/cleveland.js';
 import { registerFont } from '../gfx/text.js';
 import { makeFx, makeMateo, makeOpponentBody, makeRing, outlineImage } from '../gfx/textures.js';
@@ -24,6 +28,10 @@ const IMAGES = {
   'portrait_new-mexico': portraitMateo,
   portrait_toledo: portraitTessa,
   'head_bowling-green': headGary,
+  head_ohio: headRay,
+  portrait_ohio: portraitRay,
+  'head_central-michigan': headTrevor,
+  'portrait_central-michigan': portraitTrevor,
   'head_ball-state': headHannah,
   'portrait_ball-state': portraitHannah,
   'portrait_bowling-green': portraitGary,
@@ -54,6 +62,9 @@ export class Boot extends Phaser.Scene {
     outlineImage(this, 'head_mount-st-marys');
     outlineImage(this, 'head_new-mexico');
     makeCleveland(this);
+    const saved = loadProgress();
+    this.registry.set('fightIndex', Math.min(ROSTER.length - 1, saved.fight));
+    this.registry.set('champ', saved.champ);
     this.scene.start('Title');
   }
 }

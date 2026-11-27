@@ -18,7 +18,7 @@ export class Intro extends Phaser.Scene {
     g.fillStyle(0xfcfcfc, 1); g.fillRect(0, 24, W, 2); g.fillRect(0, 158, W, 2);
 
     text(this, W / 2, 6, 'MID-MAJOR CIRCUIT', 0xf8b800, 0.5);
-    text(this, W / 2, 15, `FIGHT ${currentFight(this) + 1}`, 0xfcfcfc, 0.5);
+    text(this, W / 2, 15, opp.boss ? 'TITLE FIGHT' : `FIGHT ${currentFight(this) + 1}`, 0xfcfcfc, 0.5);
 
     const left = this.add.image(-40, 158, 'portrait_new-mexico').setOrigin(0.5, 1);
     const right = this.add.image(W + 40, 158, `portrait_${opp.key}`).setOrigin(0.5, 1);

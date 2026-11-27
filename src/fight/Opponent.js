@@ -198,6 +198,8 @@ export class Opponent {
           this.setGloveFlash(false);
           this.strikes = this.move.strikes.map((s) => ({ ...s, launched: false, resolved: false }));
           this.landed = 0; this.blocked = 0;
+          // A feint: pull the punch, wait a beat, then throw the real one.
+          if (this.move.feint) { this.setPose(this.guard === 'high' ? 'guardHigh' : 'guardLow', 20); this.scene.popup('FEINT!', this.baseX, this.baseY - 62, 0xbcbcbc); }
         }
         break;
       }

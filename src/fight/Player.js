@@ -3,23 +3,26 @@
 import { audio } from '../audio/audio.js';
 import { controls } from '../input/controls.js';
 import { TUNE, num, PAL } from '../constants.js';
+import { drawArm } from './arms.js';
 
 const POSES = {
   idle: { lx: -22, ly: -6, rx: 22, ry: -6 },
   block: { lx: -8, ly: -16, rx: 8, ry: -16, by: 2 },
-  bodyL: { lx: -6, ly: -46, ls: 0.85, rx: 22, ry: -4, by: -3 },
-  bodyR: { lx: -22, ly: -4, rx: 6, ry: -46, rs: 0.85, by: -3 },
-  headL: { lx: -4, ly: -76, ls: 0.75, rx: 22, ry: -4, by: -5 },
-  headR: { lx: -22, ly: -4, rx: 4, ry: -76, rs: 0.75, by: -5 },
-  dodgeL: { lx: -20, ly: -2, rx: 20, ry: -2, bx: -34, by: 4 },
-  dodgeR: { lx: -20, ly: -2, rx: 20, ry: -2, bx: 34, by: 4 },
+  bodyL: { lx: -6, ly: -46, ls: 0.85, rx: 20, ry: -2, bx: 3, by: -4, tilt: 7, z: 0.97 },
+  bodyR: { lx: -20, ly: -2, rx: 6, ry: -46, rs: 0.85, bx: -3, by: -4, tilt: -7, z: 0.97 },
+  headL: { lx: -4, ly: -76, ls: 0.75, rx: 20, ry: -2, bx: 3, by: -7, tilt: 8, z: 0.95 },
+  headR: { lx: -20, ly: -2, rx: 4, ry: -76, rs: 0.75, bx: -3, by: -7, tilt: -8, z: 0.95 },
+  dodgeL: { lx: -20, ly: -8, rx: 18, ry: -4, bx: -34, by: 5, tilt: -12 },
+  dodgeR: { lx: -18, ly: -4, rx: 20, ry: -8, bx: 34, by: 5, tilt: 12 },
   hit: { lx: -26, ly: 2, rx: 26, ry: 2, by: 7 },
   winded: { lx: -24, ly: 10, rx: 24, ry: 10, by: 4 },
-  upWind: { lx: -20, ly: -8, rx: 28, ry: 16, by: 8 },
-  upStrike: { lx: -20, ly: -6, rx: 2, ry: -84, rs: 0.9, by: -10 },
+  upWind: { lx: -20, ly: -8, rx: 28, ry: 16, by: 9, tilt: 10, z: 1.04 },
+  upStrike: { lx: -20, ly: -6, rx: 2, ry: -84, rs: 0.9, by: -12, tilt: -8, z: 0.95 },
   victory: { lx: -22, ly: -44, rx: 22, ry: -44, by: -2 },
+  sprawl: { lx: -32, ly: -22, rx: 32, ry: -18, by: 2 },
+  corner: { lx: -20, ly: -6, rx: 20, ry: -6, bx: 78, by: 10 },
 };
-const BASE = { lx: 0, ly: 0, ls: 1, rx: 0, ry: 0, rs: 1, bx: 0, by: 0 };
+const BASE = { lx: 0, ly: 0, ls: 1, rx: 0, ry: 0, rs: 1, bx: 0, by: 0, tilt: 0, z: 1 };
 const pose = (name) => ({ ...BASE, ...POSES[name] });
 
 const PUNCH_IMPACT = 90;
@@ -45,8 +48,14 @@ export class Player {
     this.rate = 20;
     this.clock = 0;
     this.sparkT = 0;
+    this.fall = 0;
+    this.fallT = 0;
+    this.fallDir = 1;
+    this.armStyle = {
+      upper: 14, fore: 14, width: 6, sleeveTo: 0,
+      skin: num(PAL.cherry), outline: 0x880018, cuff: 0xbcbcbc,
+    };
     this.tintT = 0;
-    this.sink = 0;
     this.fullReset();
   }
 
@@ -61,7 +70,7 @@ export class Player {
     this.gas = TUNE.gasMax;
     this.windedT = 0;
     this.kdRound = 0;
-    this.sink = 0;
+    this.fall = 0;
     this.toIdle();
   }
 
@@ -215,7 +224,10 @@ export class Player {
     this.kdTotal++;
     this.kdRound++;
     this.windedT = 0;
-    this.setPose('hit', 10);
+    this.setPose('sprawl', 14);
+    this.fallT = 0;
+    this.landed_ = false;
+    this.fallDir = Math.random() < 0.5 ? -1 : 1;
   }
 
   getUp(hpFraction) {
@@ -226,31 +238,51 @@ export class Player {
 
   celebrate() { this.state = 'victory'; this.setPose('victory', 12); }
 
+  // Step aside to a neutral corner while the opponent takes a count.
+  toCorner() { this.state = 'corner'; this.t = 0; this.setPose('corner', 6); }
+  fromCorner() { if (this.state === 'corner') this.toIdle(); }
+
   // ---------- drawing ----------
   animate(dt) {
     const k = 1 - Math.exp((-dt / 1000) * this.rate);
     for (const key of Object.keys(BASE)) this.cur[key] += (this.target[key] - this.cur[key]) * k;
     if (this.tintT > 0) { this.tintT -= dt; if (this.tintT <= 0) { this.body.clearTint(); this.head.clearTint(); } }
 
-    const sinkTarget = this.state === 'down' ? 1 : 0;
-    this.sink += (sinkTarget - this.sink) * (1 - Math.exp((-dt / 1000) * 7));
+    // Knockdown: stagger, then topple back toward the camera and bounce.
+    let stagger = 0; let bounceY = 0;
+    if (this.state === 'down') {
+      this.fallT += dt;
+      const t = this.fallT;
+      if (t < 280) stagger = Math.sin(t / 36) * 5;
+      const u = Math.min(1, Math.max(0, (t - 280) / 420));
+      this.fall = u * u;
+      if (u >= 1 && !this.landed_) { this.landed_ = true; this.scene.thud(this.baseX, this.baseY + 30); }
+      if (t > 700 && t < 920) bounceY = -5 * Math.sin((Math.PI * (t - 700)) / 220);
+    } else if (this.fall > 0) {
+      this.fall = Math.max(0, this.fall - dt / 400);
+    }
+    const f = this.fall;
 
-    const idleBob = this.state === 'idle' ? Math.round(Math.sin(this.clock / 140) * 1.2) : 0;
+    const idle = this.state === 'idle' || this.state === 'corner';
+    const idleBob = idle ? Math.round(Math.sin(this.clock / 140) * 1.2) : 0;
     const pant = this.winded ? Math.round(Math.sin(this.clock / 60) * 1.5) : 0;
     const bounce = this.state === 'victory' ? -Math.abs(Math.sin(this.clock / 130)) * 6 : 0;
+    const sway = idle ? Math.sin(this.clock / 190) * 1.5 : 0;
     const c = this.cur;
+    this.c.setAngle(c.tilt * (1 - f) + this.fallDir * 80 * f + stagger);
+    this.c.setScale(c.z);
     this.c.setPosition(
-      Math.round(this.baseX + c.bx),
-      Math.round(this.baseY + c.by + idleBob + pant + bounce + this.sink * 56),
+      Math.round(this.baseX + c.bx + this.fallDir * 14 * f),
+      Math.round(this.baseY + c.by + idleBob + pant + bounce + f * 34 + bounceY),
     );
-    this.gl.setPosition(Math.round(c.lx), Math.round(c.ly)).setScale(c.ls);
-    this.gr.setPosition(Math.round(c.rx), Math.round(c.ry)).setScale(c.rs);
+    const lx = c.lx; const ly = c.ly + sway;
+    const rx = c.rx; const ry = c.ry - sway;
+    this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);
+    this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
 
-    const sleeve = num(PAL.cherry);
     this.arms.clear();
-    this.arms.lineStyle(6, sleeve, 1);
-    this.arms.lineBetween(-16, 6, Math.round(c.lx), Math.round(c.ly) + 4);
-    this.arms.lineBetween(16, 6, Math.round(c.rx), Math.round(c.ry) + 4);
+    drawArm(this.arms, -16, 7, lx, ly + 3, -1, this.armStyle, c.ls);
+    drawArm(this.arms, 16, 7, rx, ry + 3, 1, this.armStyle, c.rs);
 
     // Sequins: a few pixels twinkle on the bodysuit.
     this.sparkT -= dt;

@@ -47,7 +47,7 @@ export class Fight extends Phaser.Scene {
     this.player.roundReset();
     this.opponent.roundReset(this.round - 1);
     this.overlay.setVisible(false);
-    this.setBanner(`ROUND ${this.round}`, '');
+    this.setBanner(`ROUND ${this.round}`, this.round === 1 ? 'DODGE, THEN COUNTER!' : '');
     this.announced = false;
   }
 
@@ -168,8 +168,8 @@ export class Fight extends Phaser.Scene {
 
   playerWasHit(strike) {
     audio.hurt();
-    this.points.o += strike.dmg >= 12 ? 3 : 2;
-    this.cameras.main.shake(strike.dmg >= 12 ? 160 : 90, strike.dmg >= 12 ? 0.02 : 0.012);
+    this.points.o += strike.dmg >= 10 ? 3 : 2;
+    this.cameras.main.shake(strike.dmg >= 10 ? 160 : 90, strike.dmg >= 10 ? 0.02 : 0.012);
     this.hitstop = 40;
   }
 
@@ -195,12 +195,25 @@ export class Fight extends Phaser.Scene {
     this.count = { who, plan, n: 0, t: -500, mash: 0, done: false };
     audio.fall();
     audio.crowd();
+    if (who === 'opponent') this.player.toCorner();
     this.crowdGoesWild(1500);
-    this.cameras.main.shake(200, 0.015);
     this.setBanner('DOWN!', who === 'player' && plan ? 'MASH Z AND X TO GET UP!' : '', 0xf87858);
   }
 
   crowdGoesWild(ms) { this.flashT = ms; }
+
+  // A body hits the canvas: shake, thump and a puff of dust.
+  thud(x, y) {
+    audio.thud();
+    this.cameras.main.shake(220, 0.02);
+    for (let i = 0; i < 8; i++) {
+      const d = this.add.image(x, y, 'pixel').setDepth(15).setScale(2).setTint(0xbcd8f8);
+      this.tweens.add({
+        targets: d, x: x + (i - 3.5) * 9, y: y - 4 - Math.random() * 8, alpha: 0,
+        duration: 380, ease: 'Quad.easeOut', onComplete: () => d.destroy(),
+      });
+    }
+  }
 
   updateCount(dt) {
     const c = this.count;
@@ -238,6 +251,7 @@ export class Fight extends Phaser.Scene {
 
   resumeAfterCount() {
     this.mashG.clear();
+    this.player.fromCorner();
     this.setBanner('FIGHT!', '');
     this.phase = 'resume';
     this.phaseT = 0;
@@ -251,7 +265,7 @@ export class Fight extends Phaser.Scene {
     audio.stopMusic();
     audio.bell(3);
     audio.fanfare(outcome === 'win');
-    if (outcome === 'win') { this.player.celebrate(); audio.crowd(); this.crowdGoesWild(4000); }
+    if (outcome === 'win') { this.player.fromCorner(); this.player.celebrate(); audio.crowd(); this.crowdGoesWild(4000); }
     else this.opponent.celebrate();
     this.setBanner(how, outcome === 'win' ? 'MATEO WINS!' : `${this.data_.short} WINS`, outcome === 'win' ? 0xf8b800 : 0xf87858);
     this.finishHow = how;

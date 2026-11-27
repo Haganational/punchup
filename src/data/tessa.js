@@ -49,26 +49,26 @@ export default {
   // open after you dodge.  star: dodging it and countering earns a star.
   moves: {
     jabL: {
-      label: 'JAB', tell: 520, tellPose: 'cockL', cue: 'tell',
-      strikes: [{ at: 0, hand: 'L', dmg: 7, blockable: true }],
+      label: 'JAB', tell: 600, tellPose: 'cockL', cue: 'tell',
+      strikes: [{ at: 0, hand: 'L', dmg: 6, blockable: true }],
       openMiss: 750, bodyBonus: 1.5,
     },
     jabR: {
-      label: 'JAB', tell: 520, tellPose: 'cockR', cue: 'tell',
-      strikes: [{ at: 0, hand: 'R', dmg: 7, blockable: true }],
+      label: 'JAB', tell: 600, tellPose: 'cockR', cue: 'tell',
+      strikes: [{ at: 0, hand: 'R', dmg: 6, blockable: true }],
       openMiss: 750, bodyBonus: 1.5,
     },
     hook: {
-      label: 'HOOK', tell: 780, tellPose: 'windR', cue: 'tell',
-      strikes: [{ at: 0, hand: 'R', dmg: 13, blockable: false, hook: true }],
+      label: 'HOOK', tell: 860, tellPose: 'windR', cue: 'tell',
+      strikes: [{ at: 0, hand: 'R', dmg: 11, blockable: false, hook: true }],
       openMiss: 950, star: true,
       flash: { at: 320, len: 150, zone: 'head' },
     },
     signature: {
       label: 'HAIR FLIP!', tell: 980, tellPose: 'flip', cue: 'tellBig', announce: true,
       strikes: [
-        { at: 0, hand: 'L', dmg: 9, blockable: false },
-        { at: 460, hand: 'R', dmg: 9, blockable: false },
+        { at: 0, hand: 'L', dmg: 8, blockable: false },
+        { at: 500, hand: 'R', dmg: 8, blockable: false },
       ],
       openMiss: 1300, star: true,
       flash: { at: 520, len: 150, zone: 'body' },
@@ -77,8 +77,8 @@ export default {
 
   // Round-by-round behavior: time between attacks, tell speed, and move mix.
   rounds: [
-    { idle: [1300, 2100], tellScale: 1.0, weights: { jabL: 4, jabR: 4, hook: 2, signature: 0 } },
-    { idle: [1000, 1700], tellScale: 0.86, weights: { jabL: 3, jabR: 3, hook: 3, signature: 2 } },
-    { idle: [800, 1300], tellScale: 0.74, weights: { jabL: 3, jabR: 3, hook: 3, signature: 3 } },
+    { idle: [1500, 2400], tellScale: 1.0, weights: { jabL: 4, jabR: 4, hook: 2, signature: 0 } },
+    { idle: [1100, 1800], tellScale: 0.88, weights: { jabL: 3, jabR: 3, hook: 3, signature: 2 } },
+    { idle: [900, 1400], tellScale: 0.78, weights: { jabL: 3, jabR: 3, hook: 3, signature: 3 } },
   ],
 };

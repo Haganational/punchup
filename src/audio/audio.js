@@ -126,7 +126,8 @@ class AudioEngine {
     }
   }
   crowd() { this.noise({ t: 1.2, v: 0.22, fc: 700, fc2: 1500, type: 'bandpass' }); }
-  fall() { this.tone({ f: 500, f2: 60, t: 0.5, v: 0.25 }); this.noise({ t: 0.25, v: 0.5, fc: 300, delay: 0.45 }); }
+  fall() { this.tone({ f: 520, f2: 70, t: 0.7, v: 0.22 }); }
+  thud() { this.noise({ t: 0.3, v: 0.7, fc: 260, fc2: 80 }); this.tone({ type: 'triangle', f: 90, f2: 35, t: 0.3, v: 0.7 }); }
   fanfare(win) {
     const notes = win ? [523, 659, 784, 1047, 784, 1047, 1319] : [392, 370, 349, 330, 294, 262, 196];
     notes.forEach((f, i) => this.tone({ f, t: i === notes.length - 1 ? 0.5 : 0.13, v: 0.22, delay: i * 0.13 }));

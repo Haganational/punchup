@@ -2,6 +2,7 @@
 // puppet-style sprite (head, torso, legs, two gloves) that moves between poses.
 import { audio } from '../audio/audio.js';
 import { num } from '../constants.js';
+import { drawArm } from './arms.js';
 
 // Glove positions (lx,ly / rx,ry), glove scale (ls / rs), head and body offsets.
 // "L" is the glove on the left side of the screen.
@@ -10,19 +11,20 @@ const POSES = {
   guardLow: { lx: -14, ly: 12, rx: 14, ry: 12 },
   blockHigh: { lx: -8, ly: -18, rx: 8, ry: -18 },
   blockLow: { lx: -8, ly: 10, rx: 8, ry: 10 },
-  cockL: { lx: -32, ly: -24, rx: 14, ry: -10, bx: -3 },
-  cockR: { lx: -14, ly: -10, rx: 32, ry: -24, bx: 3 },
-  windR: { lx: -12, ly: -12, rx: 42, ry: -4, rs: 1.15, bx: 5, hx: 2 },
-  flip: { lx: -28, ly: 8, rx: 28, ry: 8, hy: -4, by: -2 },
-  strikeL: { lx: -8, ly: 40, ls: 2.3, rx: 16, ry: -8, by: 4, hy: 3 },
-  strikeR: { lx: -16, ly: -8, rx: 8, ry: 40, rs: 2.3, by: 4, hy: 3 },
-  hookR: { lx: -14, ly: -10, rx: -10, ry: 36, rs: 2.5, bx: -4, by: 4, hy: 3 },
-  open: { lx: -26, ly: 24, rx: 26, ry: 24, hy: 4, by: 2 },
+  cockL: { lx: -34, ly: -20, rx: 14, ry: -10, bx: -4, by: -2, tilt: -5, z: 0.96 },
+  cockR: { lx: -14, ly: -10, rx: 34, ry: -20, bx: 4, by: -2, tilt: 5, z: 0.96 },
+  windR: { lx: -12, ly: -12, rx: 44, ry: -2, rs: 1.15, bx: 7, hx: 2, tilt: 9, z: 0.96 },
+  flip: { lx: -30, ly: 6, rx: 30, ry: 6, hy: -4, by: -3, z: 0.95 },
+  strikeL: { lx: -6, ly: 38, ls: 2.3, rx: 17, ry: -6, bx: 3, by: 6, hy: 3, tilt: 6, z: 1.1 },
+  strikeR: { lx: -17, ly: -6, rx: 6, ry: 38, rs: 2.3, bx: -3, by: 6, hy: 3, tilt: -6, z: 1.1 },
+  hookR: { lx: -14, ly: -10, rx: -12, ry: 34, rs: 2.5, bx: -6, by: 6, hy: 3, tilt: -10, z: 1.1 },
+  open: { lx: -27, ly: 22, rx: 27, ry: 24, hy: 5, by: 4, z: 1.04 },
   stunned: { lx: -24, ly: 28, rx: 24, ry: 28, hy: 2 },
-  sidestep: { lx: -16, ly: -13, rx: 16, ry: -13, bx: 30 },
+  sidestep: { lx: -16, ly: -13, rx: 16, ry: -13, bx: 30, tilt: 8 },
+  sprawl: { lx: -34, ly: -30, rx: 34, ry: -26, hy: -5 },
   victory: { lx: -24, ly: -50, rx: 24, ry: -50, hy: -2 },
 };
-const BASE = { lx: 0, ly: 0, ls: 1, rx: 0, ry: 0, rs: 1, hx: 0, hy: 0, bx: 0, by: 0 };
+const BASE = { lx: 0, ly: 0, ls: 1, rx: 0, ry: 0, rs: 1, hx: 0, hy: 0, bx: 0, by: 0, tilt: 0, z: 1 };
 const pose = (name) => ({ ...BASE, ...POSES[name] });
 
 export class Opponent {
@@ -46,7 +48,14 @@ export class Opponent {
     this.target = pose('guardHigh');
     this.rate = 14;
     this.kick = { hx: 0, hy: 0, by: 0 };
-    this.sink = 0;       // 0 = standing, 1 = flat on the canvas
+    this.fall = 0;       // 0 = standing, 1 = flat on the canvas
+    this.fallT = 0;
+    this.fallDir = 1;
+    this.armStyle = {
+      upper: 15, fore: 15, width: 6,
+      skin: num(data.colors.skin), outline: num(data.colors.skinDark),
+      sleeve: num(data.colors.shirt), sleeveOutline: num(data.colors.shirtDark), sleeveTo: 0.5,
+    };
     this.clock = 0;
     this.fullReset();
   }
@@ -60,7 +69,7 @@ export class Opponent {
   roundReset(roundIndex) {
     this.round = this.d.rounds[Math.min(roundIndex, this.d.rounds.length - 1)];
     this.kdRound = 0;
-    this.sink = 0;
+    this.fall = 0;
     this.lastMove = null;
     this.head.setFlipX(false);
     this.setGloveFlash(false);
@@ -350,7 +359,10 @@ export class Opponent {
     this.kdRound++;
     this.head.setFlipX(false);
     this.setGloveFlash(false);
-    this.setPose('stunned', 10);
+    this.setPose('sprawl', 14);
+    this.fallT = 0;
+    this.landed_ = false;
+    this.fallDir = this.kick.hx >= 0 ? 1 : -1;
   }
 
   // null means she stays down for the full count.
@@ -382,28 +394,48 @@ export class Opponent {
     this.kick.hx *= decay; this.kick.hy *= decay; this.kick.by *= decay;
     if (this.tintT > 0) { this.tintT -= dt; if (this.tintT <= 0) { this.head.clearTint(); this.torso.clearTint(); } }
 
-    // dropping to the canvas and getting back up
-    const sinkTarget = this.state === 'down' ? 1 : 0;
-    this.sink += (sinkTarget - this.sink) * (1 - Math.exp((-dt / 1000) * 7));
+    // Knockdown: stagger for a beat, topple over like a felled tree, bounce once.
+    let stagger = 0; let bounceY = 0;
+    if (this.state === 'down') {
+      this.fallT += dt;
+      const t = this.fallT;
+      if (t < 300) stagger = Math.sin(t / 38) * 5;
+      const u = Math.min(1, Math.max(0, (t - 300) / 460));
+      this.fall = u * u;
+      if (u >= 1 && !this.landed_) { this.landed_ = true; this.scene.thud(this.baseX + this.fallDir * 30, this.baseY + 62); }
+      if (t > 760 && t < 1000) bounceY = -6 * Math.sin((Math.PI * (t - 760)) / 240);
+    } else if (this.fall > 0) {
+      this.fall = Math.max(0, this.fall - dt / 450);   // climbing back up
+    }
+    const f = this.fall;
 
-    const bob = this.state === 'idle' || this.state === 'tell' ? Math.round(Math.sin(this.clock / 170) * 1.5) : 0;
+    const idle = this.state === 'idle';
+    const bob = idle || this.state === 'tell' ? Math.round(Math.sin(this.clock / 170) * 1.5) : 0;
     const wobble = this.state === 'stunned' ? Math.sin(this.clock / 45) * 3 : 0;
     const bounce = this.state === 'victory' ? -Math.abs(Math.sin(this.clock / 140)) * 5 : 0;
+    // Little signs of life: gloves drift in the guard and tremble during a wind-up.
+    const sway = idle ? Math.sin(this.clock / 230) * 1.5 : 0;
+    const shake = this.state === 'tell' ? Math.sin(this.clock / 22) * 1 : 0;
     const c = this.cur;
-    const bx = c.bx; const by = c.by + this.kick.by + bob;
 
-    this.c.setPosition(Math.round(this.baseX + bx), Math.round(this.baseY + by + this.sink * 46 + bounce));
-    this.c.setScale(1, 1 - 0.7 * this.sink);
+    const angle = c.tilt * (1 - f) + this.fallDir * 86 * f + stagger;
+    const hop = -12 * Math.sin(Math.PI * Math.min(1, f * 1.4)) * (f < 0.72 ? 1 : 0);
+    this.c.setAngle(angle);
+    this.c.setScale(c.z * (1 - 0.1 * f));
+    this.c.setPosition(
+      Math.round(this.baseX + c.bx * (1 - f) + this.fallDir * 6 * f),
+      Math.round(this.baseY + c.by + this.kick.by + bob + bounce + f * 44 + hop + bounceY),
+    );
     this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble), Math.round(-4 + c.hy + this.kick.hy));
-    this.gl.setPosition(Math.round(c.lx), Math.round(c.ly)).setScale(c.ls);
-    this.gr.setPosition(Math.round(c.rx), Math.round(c.ry)).setScale(c.rs);
+    const lx = c.lx + shake; const ly = c.ly + sway;
+    const rx = c.rx - shake; const ry = c.ry - sway;
+    this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);
+    this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
     // The glove closer to the camera draws on top.
     this.c.bringToTop(c.ls >= c.rs ? this.gl : this.gr);
 
-    const skin = num(this.d.colors.skin);
     this.arms.clear();
-    this.arms.lineStyle(6, skin, 1);
-    this.arms.lineBetween(-21, 2, Math.round(c.lx), Math.round(c.ly));
-    this.arms.lineBetween(21, 2, Math.round(c.rx), Math.round(c.ry));
+    drawArm(this.arms, -21, 1, lx, ly, -1, this.armStyle, c.ls);
+    drawArm(this.arms, 21, 1, rx, ry, 1, this.armStyle, c.rs);
   }
 }

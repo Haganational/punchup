@@ -168,6 +168,62 @@ export function makeCleveland(scene) {
     word(ctx, font, 'MARKET', 71, 64, '#fcf0c0');
   });
 
+  // ---- The bridge and its stone guardians, at dusk ----
+  canvas(scene, 'bg_bridge', W, BH, (r) => {
+    const rand = rng(1932);
+    sky(r, [['#281848', 20], ['#503068', 18], ['#904868', 18], ['#d06858', 16], ['#f09858', 14]]);
+    skyline(r, 86, '#281838', '#503060', '#f8d878', rand, 0.22);
+    // river valley and the deck
+    r('#301c40', 0, 86, W, 20); for (let i = 0; i < 40; i++) r('#f09858', Math.floor(rand() * W), 88 + Math.floor(rand() * 16), 3, 1);
+    r('#584858', 0, 104, W, 6); r('#786878', 0, 104, W, 1);
+    for (let x = 0; x < W; x += 10) r('#584858', x, 96, 1, 8); r('#786878', 0, 96, W, 1);
+    for (let x = -20; x < W; x += 64) { for (let i = 0; i < 32; i++) { const y = Math.round(Math.sqrt(Math.max(0, 1024 - (i - 16) * (i - 16) * 4)) * 0.5); r('#403040', x + i * 2, 110, 2, 16 - y); } }
+    r('#403040', 0, 110, W, 3);
+    // two sandstone pylons, each with a carved guardian
+    const stone = '#d8b888'; const stDk = '#a88858'; const stLt = '#f8dca8';
+    [26, 176].forEach((x) => {
+      r(stone, x, 24, 54, 110); r(stLt, x, 24, 3, 110); r(stDk, x + 50, 24, 4, 110);
+      r(stone, x + 4, 16, 46, 8); r(stone, x + 10, 10, 34, 6); r(stLt, x + 4, 16, 46, 1);
+      for (let y = 60; y < 134; y += 9) r(stDk, x + 3, y, 48, 1);
+      // the guardian: helmeted head, broad shoulders, hands resting on a carved truck
+      r(stDk, x + 20, 28, 14, 12); r(stone, x + 22, 30, 10, 9); r(stDk, x + 24, 33, 2, 2); r(stDk, x + 29, 33, 2, 2); r(stDk, x + 25, 37, 5, 1);
+      r(stDk, x + 18, 24, 18, 5); r(stLt, x + 20, 25, 14, 1);
+      r(stDk, x + 10, 40, 34, 16); r(stone, x + 13, 42, 28, 13); r(stDk, x + 26, 42, 2, 13);
+      r(stDk, x + 16, 52, 22, 8); r(stLt, x + 18, 54, 18, 4); r(stDk, x + 20, 58, 4, 3); r(stDk, x + 30, 58, 4, 3);
+    });
+    // roadway in front, lamps
+    r('#201820', 0, 126, W, 24); r('#403040', 0, 126, W, 1);
+    for (let x = 12; x < W; x += 36) r('#f8d878', x, 138, 12, 1);
+    [100, 150].forEach((x) => { r('#201820', x, 84, 2, 42); r('#fcf0c0', x - 2, 80, 6, 5); r('#f8d878', x - 3, 85, 8, 1); });
+  });
+
+  // ---- The arena on title night ----
+  canvas(scene, 'bg_arena', W, BH, (r, ctx) => {
+    const rand = rng(2016);
+    sky(r, [['#080818', 30], ['#0c1030', 30], ['#181c48', 30]]);
+    for (let i = 0; i < 50; i++) r('#7c8cd8', Math.floor(rand() * W), Math.floor(rand() * 60), 1, 1);
+    // sweeping spotlights
+    [[40, -30], [128, 0], [216, 30]].forEach(([x, lean]) => {
+      for (let y = 0; y < 76; y++) { const w = 2 + Math.round((76 - y) / 6); r(y % 2 ? '#283070' : '#303c88', Math.round(x + (lean * (76 - y)) / 76 - w / 2), y, w, 1); }
+    });
+    // the building: a long glass drum with a banded roof
+    r('#283048', 16, 70, 224, 52); r('#3c4868', 16, 70, 224, 2); r('#181c30', 16, 76, 224, 2);
+    for (let i = 0; i < 20; i++) r('#283048', 28 + i * 2, 70 - Math.round(Math.sqrt(400 - (i - 20) * (i - 20)) * 0.35), 200 - i * 4, 2);
+    for (let x = 22; x < 236; x += 7) for (let y = 82; y < 104; y += 6) r(rand() < 0.7 ? '#f8d878' : '#58a8f8', x, y, 5, 4);
+    // marquee
+    r('#681020', 68, 84, 120, 22); r('#f8b800', 68, 84, 120, 1); r('#f8b800', 68, 105, 120, 1);
+    for (let i = 0; i < 30; i++) { r(i % 2 ? '#fcfcfc' : '#f8d878', 69 + i * 4, 86, 2, 2); r(i % 2 ? '#f8d878' : '#fcfcfc', 69 + i * 4, 102, 2, 2); }
+    word(ctx, font, 'TITLE FIGHT', 84, 91, '#fcfcfc');
+    r('#fce0a8', 96, 108, 64, 14); r('#681020', 127, 108, 2, 14); r('#f8b800', 96, 108, 64, 1);
+    // plaza and the crowd heading in
+    r('#201c28', 0, 122, W, 28); r('#383048', 0, 122, W, 1);
+    const coats = ['#881400', '#004058', '#940084', '#ac7c00', '#005800', '#7c7c7c', '#0058f8'];
+    for (let i = 0; i < 44; i++) {
+      const x = Math.floor(rand() * 250); const y = 124 + Math.floor(rand() * 18);
+      r(coats[Math.floor(rand() * coats.length)], x, y + 3, 5, 7); r(['#f0d0b0', '#d09060', '#a86838'][Math.floor(rand() * 3)], x + 1, y, 3, 3);
+    }
+  });
+
   // ---- Sunrise over the lake ----
   canvas(scene, 'bg_dawn', W, BH, (r) => {
     const rand = rng(77);

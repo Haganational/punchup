@@ -6,6 +6,8 @@ const GREG = { who: 'mount-st-marys', name: 'FATHER GREG' };
 const TESSA = { who: 'toledo', name: 'TESSA' };
 const GARY = { who: 'bowling-green', name: 'GARY' };
 const HANNAH = { who: 'ball-state', name: 'HANNAH' };
+const RAY = { who: 'ohio', name: 'RAY' };
+const TREVOR = { who: 'central-michigan', name: 'TREVOR' };
 const say = (speaker, text) => ({ ...speaker, text });
 const tell = (text) => ({ who: 'narrator', text });
 
@@ -64,17 +66,53 @@ export const CHAPTERS = [
       ] },
     ],
   },
+  {
+    title: 'CHAPTER 4', sub: 'BLACK TIE OPTIONAL',
+    panels: [
+      { bg: 'lake', place: 'THE LAKEFRONT, MIDNIGHT', lines: [
+        say(HANNAH, 'NOBODY HAS PUT ME DOWN SINCE THE VAN ROLLED BACK ON ME IN MUNCIE. I LIKE YOU.'),
+        say(TESSA, 'GET IN LINE.'),
+        say(MATEO, 'THREE DOWN. WHO IS LEFT, FATHER?'),
+        say(GREG, 'RAY ABERNATHY. HE IS WAITING ON THE BRIDGE. HE SAID TO DRESS UP.'),
+      ] },
+      { bg: 'bridge', place: 'THE GUARDIANS BRIDGE', lines: [
+        tell('STONE GIANTS WATCH THE BRIDGE. BENEATH THEM STANDS A MAN IN A BOW TIE AND VERY LITTLE ELSE.'),
+        say(RAY, 'MISTER SANDOVAL. THEY TELL ME YOU FIGHT IN SEQUINS. I RESPECT A MAN WHO COMMITS.'),
+        say(MATEO, 'YOU ARE WEARING A BOW TIE WITH NO SHIRT, RAY.'),
+        say(RAY, 'THE JACKET IS A RENTAL. THE REST OF ME IS VINTAGE. SHALL WE?'),
+        say(HANNAH, 'I WOULD LIKE IT NOTED THAT THIS IS THE BEST WEEK OF MY LIFE.'),
+      ] },
+    ],
+  },
+  {
+    title: 'CHAPTER 5', sub: 'THE MAIN EVENT',
+    panels: [
+      { bg: 'arena', place: 'THE ARENA', lines: [
+        tell('SPOTLIGHTS SWEEP THE SKY. THE WHOLE CITY HAS COME DOWNTOWN FOR THE GOLDEN MIC.'),
+        say(RAY, 'A WORD OF ADVICE. HOLLOWAY HAS NEVER BLINKED ON AIR. NOT ONCE. IT IS UNSETTLING.'),
+        say(TREVOR, 'SANDOVAL. YOU CHARMED MY WHOLE CIRCUIT. TESSA WILL NOT STOP TALKING ABOUT YOUR CHEEKBONES.'),
+        say(MATEO, 'THEY ARE LOAD BEARING.'),
+        say(TREVOR, 'CUTE. THE MIC STAYS WITH ME. BUT I WILL LET YOU HOLD IT ONCE, BEFORE YOU GO DOWN.'),
+        say(GREG, 'THIS IS IT, MY SON. HANDS UP, CHIN DOWN, SEQUINS OUT.'),
+      ] },
+    ],
+  },
 ];
 
 export const ENDING = {
-  title: 'TO BE CONTINUED', sub: 'THE CIRCUIT ROLLS ON',
+  title: 'CHAMPION', sub: 'THE GOLDEN MIC IS YOURS',
   panels: [
-    { bg: 'lake', place: 'THE LAKEFRONT, MIDNIGHT', lines: [
-      say(HANNAH, 'NOBODY HAS PUT ME DOWN SINCE THE VAN ROLLED BACK ON ME IN MUNCIE. I LIKE YOU.'),
-      say(TESSA, 'GET IN LINE.'),
-      say(MATEO, 'THREE DOWN. WHO IS LEFT, FATHER?'),
-      say(GREG, 'RAY ABERNATHY. AND THEN THE BOSS HIMSELF, TREVOR HOLLOWAY. THEY SAY HE HAS NEVER BLINKED ON AIR.'),
-      say(MATEO, '...I AM GOING TO NEED MORE SEQUINS.'),
+    { bg: 'arena', place: 'THE ARENA', lines: [
+      say(TREVOR, 'I BLINKED. FIRST TIME IN SIX YEARS. HERE. TAKE THE MIC BEFORE I CHANGE MY MIND.'),
+      say(MATEO, 'IT IS HEAVIER THAN IT LOOKS.'),
+      say(HANNAH, 'I CAN CARRY IT FOR YOU. AND YOU. AT THE SAME TIME.'),
+    ] },
+    { bg: 'dawn', place: 'SUNRISE ON THE LAKE', lines: [
+      say(TESSA, 'SO WHAT NOW, CHAMP? CLEVELAND IS ALL OUT OF ANCHORS.'),
+      say(GARY, 'HEAD WEST, KID. THE MOUNTAIN CIRCUIT. THIN AIR AND THICK ARMS.'),
+      say(GREG, 'I HEAR LUPE ARCHULETA HAS BEEN ASKING ABOUT YOU, MY SON. SHE DID NOT SOUND FRIENDLY.'),
+      say(MATEO, 'LUPE. OF COURSE. PACK THE GOOD SEQUINS, FATHER.'),
+      tell('END OF THE MID-MAJOR CIRCUIT. THANK YOU FOR PLAYING.'),
     ] },
   ],
 };

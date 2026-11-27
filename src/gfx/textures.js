@@ -83,6 +83,11 @@ export function makeOpponentBody(scene, key, c) {
       [20, 26, 32].forEach((y) => { r(l, 18, y, 4, 3); r(l, 26, y, 4, 3); });
       if (c.chestHair) for (let i = 0; i < 16; i++) r(c.chestHair, 13 + ((i * 7) % 22), 9 + ((i * 5) % 7), 1, 1);
       r(c.trim, 10, 40, 28, 4); r(PAL.gold, 20, 39, 8, 5); r(PAL.yellow, 22, 40, 4, 2);
+      if (c.bowtie) {
+        // black-tie optional: a crisp collar and bow tie, and nothing else
+        r(PAL.white, 16, 1, 16, 3); r(PAL.grey, 16, 3, 16, 1); r(s, 21, 0, 6, 1);
+        r(c.bowtie, 17, 3, 5, 5); r(c.bowtie, 26, 3, 5, 5); r(c.bowtie, 22, 4, 4, 3); r(PAL.white, 18, 4, 1, 1); r(PAL.white, 27, 4, 1, 1);
+      }
       return;
     }
     if (c.body === 'top') {
@@ -352,6 +357,7 @@ export function makeFx(scene) {
   canvas(scene, 'aura_bolt', 5, 9, (r) => bitmap(r, ['...##', '..##.', '.##..', '####.', '.####', '..##.', '.##..', '##...', '#....'], { '#': PAL.yellow }));
   canvas(scene, 'aura_ember', 5, 6, (r) => bitmap(r, ['..o..', '.oo..', '.oyo.', 'oyyo.', 'oywyo', '.oyo.'], { o: PAL.orange, y: PAL.gold, w: PAL.white }));
   canvas(scene, 'aura_rose', 5, 5, (r) => bitmap(r, ['.#.#.', '#w###', '#####', '.###.', '..#..'], { '#': '#f85898', w: PAL.white }));
+  canvas(scene, 'aura_gold', 5, 5, (r) => bitmap(r, ['..#..', '.###.', '##w##', '.###.', '..#..'], { '#': PAL.gold, w: PAL.white }));
   canvas(scene, 'aura_twinkle', 5, 5, (r) => bitmap(r, ['..#..', '..#..', '##w##', '..#..', '..#..'], { '#': PAL.white, w: PAL.yellow }));
   const starRows = [
     '....#....',

@@ -22,6 +22,7 @@ export class Title extends Phaser.Scene {
     const logo = (dx, dy, tint) => text(this, W / 2 + dx, 22 + dy, 'PUNCHUP', tint, 0.5).setScale(4);
     logo(3, 3, 0x000000); logo(2, 2, 0x881400); logo(0, 0, 0xf8b800);
     text(this, W / 2, 58, 'STARRING MATEO SANDOVAL', 0xfcfcfc, 0.5);
+    if (this.registry.get('champ')) text(this, W / 2, 68, '* MID-MAJOR CHAMPION *', 0xf8b800, 0.5);
 
     const panel = this.add.graphics();
     panel.fillStyle(0x000000, 0.85);
@@ -33,7 +34,7 @@ export class Title extends Phaser.Scene {
     text(this, W / 2, 201, 'HOLD UP TO AIM AT THE HEAD', 0xbcbcbc, 0.5);
     text(this, W / 2, 210, 'LEFT/RIGHT DODGE, HOLD = LONGER', 0xbcbcbc, 0.5);
     text(this, W / 2, 220, 'DOWN BLOCK, TAP TWICE = DUCK', 0xf8b800, 0.5);
-    text(this, W / 2, 231, 'C STANCE  ENTER UPPERCUT  M MUTE', 0x7c7c7c, 0.5);
+    text(this, W / 2, 231, 'C STANCE   ENTER UPPERCUT', 0x7c7c7c, 0.5);
 
     this.blink = 0;
     audio.playMusic('title');

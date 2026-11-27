@@ -8,6 +8,7 @@ const KEYMAP = {
   KeyX: 'punchR', KeyK: 'punchR',
   Enter: 'star', Space: 'star',
   Escape: 'pause', KeyP: 'pause',
+  KeyC: 'stance', ShiftLeft: 'stance', ShiftRight: 'stance',
   KeyM: 'mute',
 };
 

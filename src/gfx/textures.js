@@ -351,6 +351,7 @@ export function makeFx(scene) {
   // Aura bits that crackle or burn around a fighter's gloves.
   canvas(scene, 'aura_bolt', 5, 9, (r) => bitmap(r, ['...##', '..##.', '.##..', '####.', '.####', '..##.', '.##..', '##...', '#....'], { '#': PAL.yellow }));
   canvas(scene, 'aura_ember', 5, 6, (r) => bitmap(r, ['..o..', '.oo..', '.oyo.', 'oyyo.', 'oywyo', '.oyo.'], { o: PAL.orange, y: PAL.gold, w: PAL.white }));
+  canvas(scene, 'aura_rose', 5, 5, (r) => bitmap(r, ['.#.#.', '#w###', '#####', '.###.', '..#..'], { '#': '#f85898', w: PAL.white }));
   canvas(scene, 'aura_twinkle', 5, 5, (r) => bitmap(r, ['..#..', '..#..', '##w##', '..#..', '..#..'], { '#': PAL.white, w: PAL.yellow }));
   const starRows = [
     '....#....',

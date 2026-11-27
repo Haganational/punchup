@@ -58,9 +58,9 @@ export class Opponent {
     this.fallT = 0;
     this.fallDir = 1;
     this.armStyle = {
-      upper: 15, fore: 15, width: 7, upperWidth: 9,
+      upper: 15, fore: 15, width: 7, upperWidth: 10,
       skin: num(data.colors.skin), outline: num(data.colors.skinDark),
-      sleeve: num(data.colors.shirt), sleeveOutline: num(data.colors.shirtDark), sleeveTo: 0.5,
+      sleeve: num(data.colors.shirt), sleeveOutline: num(data.colors.shirtDark), sleeveTo: data.colors.body ? 0 : 0.5,
     };
     this.clock = 0;
     this.fullReset();

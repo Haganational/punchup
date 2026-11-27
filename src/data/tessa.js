@@ -11,6 +11,7 @@ export default {
 
   colors: {
     shirt: '#14204c', shirtDark: '#0c1434', shirtLight: '#24347c',
+    body: 'top', skinLight: '#f8c8a0',
     trim: '#f8b800',
     trunks: '#f8b800', trunksDark: '#ac7c00', stripe: '#14204c',
     skin: '#e0a078', skinDark: '#b87850',

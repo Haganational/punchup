@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { audio } from '../audio/audio.js';
 import { W, H, TUNE } from '../constants.js';
-import tessa from '../data/tessa.js';
+import { ROSTER, currentFight, currentOpponent } from '../data/roster.js';
 import { Hud } from '../fight/Hud.js';
 import { Opponent } from '../fight/Opponent.js';
 import { Player } from '../fight/Player.js';
@@ -15,7 +15,7 @@ export class Fight extends Phaser.Scene {
   constructor() { super('Fight'); }
 
   create() {
-    this.data_ = tessa;
+    this.data_ = currentOpponent(this);
     this.crowd = this.add.image(0, 36, 'crowd0').setOrigin(0).setDepth(-1);
     this.crowdT = 0;
     this.crowdFrame = 0;
@@ -310,9 +310,11 @@ export class Fight extends Phaser.Scene {
     }
     o.add(text(this, W / 2, y, `${d.short}:`, 0xf8b800, 0.5));
     o.add(text(this, W / 2, y + 11, win ? d.lines.lose : d.lines.win, 0xfcfcfc, 0.5).setCenterAlign());
-    o.add(text(this, W / 2, 206, win ? 'NEXT UP: GARY MERCER' : 'SHAKE IT OFF, MATEO', win ? 0x58f898 : 0x3cbcfc, 0.5));
-    o.add(text(this, W / 2, 218, win ? '(COMING SOON)' : '', 0x7c7c7c, 0.5));
-    o.add(text(this, W / 2, 229, 'Z REMATCH    X TITLE', 0xfcfcfc, 0.5));
+    const next = ROSTER[currentFight(this) + 1];
+    this.canAdvance = win && !!next;
+    const headline = !win ? 'SHAKE IT OFF, MATEO' : next ? `NEXT UP: ${next.name}` : 'MORE FIGHTS COMING SOON';
+    o.add(text(this, W / 2, 206, headline, win ? 0x58f898 : 0x3cbcfc, 0.5));
+    o.add(text(this, W / 2, 229, this.canAdvance ? 'Z NEXT FIGHT    X TITLE' : 'Z REMATCH    X TITLE', 0xfcfcfc, 0.5));
     this.resultShown = true;
   }
 
@@ -377,7 +379,11 @@ export class Fight extends Phaser.Scene {
       case 'over':
         if (!this.resultShown && this.phaseT > 2200) this.showResult();
         if (this.resultShown) {
-          if (controls.justDown('punchL') || controls.justDown('star')) { this.resultShown = false; this.scene.restart(); }
+          if (controls.justDown('punchL') || controls.justDown('star')) {
+            this.resultShown = false;
+            if (this.canAdvance) { this.registry.set('fightIndex', currentFight(this) + 1); this.scene.start('Intro'); }
+            else this.scene.restart();
+          }
           else if (controls.justDown('punchR')) { this.resultShown = false; this.scene.start('Title'); }
         }
         break;

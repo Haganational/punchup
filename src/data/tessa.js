@@ -65,7 +65,7 @@ export default {
       flash: { at: 320, len: 150, zone: 'head' },
     },
     signature: {
-      label: 'HAIR FLIP!', tell: 980, tellPose: 'flip', cue: 'tellBig', announce: true,
+      label: 'HAIR FLIP!', tell: 980, tellPose: 'flip', cue: 'tellBig', announce: true, headFlip: true,
       strikes: [
         { at: 0, hand: 'L', dmg: 8, blockable: false },
         { at: 500, hand: 'R', dmg: 8, blockable: false },

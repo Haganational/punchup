@@ -16,8 +16,11 @@ const POSES = {
   dodgeR: { lx: -16, ly: -8, rx: 18, ry: -12, bx: 38, by: 6, tilt: 16 },
   hit: { lx: -26, ly: 2, rx: 26, ry: 2, by: 7 },
   winded: { lx: -24, ly: 10, rx: 24, ry: 10, by: 4 },
-  upWind: { lx: -20, ly: -8, rx: 28, ry: 16, by: 9, tilt: 10, z: 1.04 },
-  upStrike: { lx: -20, ly: -6, rx: 2, ry: -84, rs: 0.9, by: -12, tilt: -8, z: 0.95 },
+  // Star uppercut: sink and coil, scoop up through the middle, burst, follow through.
+  upDip: { lx: -15, ly: -14, rx: 27, ry: 22, rs: 1.05, bx: 5, by: 13, tilt: 13, z: 1.06 },
+  upRise: { lx: -19, ly: -4, rx: 13, ry: -26, rs: 0.98, bx: 1, by: 0, tilt: 3, z: 1.0 },
+  upStrike: { lx: -23, ly: 4, rx: 1, ry: -88, rs: 0.88, bx: -2, by: -15, tilt: -9, z: 0.94 },
+  upFollow: { lx: -25, ly: 6, rx: -9, ry: -72, rs: 0.84, bx: -4, by: -9, tilt: -14, z: 0.96 },
   victory: { lx: -22, ly: -44, rx: 22, ry: -44, by: -2 },
   sprawl: { lx: -32, ly: -22, rx: 32, ry: -18, by: 2 },
   corner: { lx: -20, ly: -6, rx: 20, ry: -6, bx: 78, by: 10 },
@@ -169,13 +172,17 @@ export class Player {
         break;
 
       case 'uppercut':
+        // Each beat blends into the next, so the arm travels one continuous arc.
+        if (this.upStep === 0 && this.t >= 190) { this.upStep = 1; this.setPose('upRise', 30); }
+        if (this.upStep === 1 && this.t >= 262) { this.upStep = 2; this.setPose('upStrike', 44); }
         if (!this.resolved && this.t >= 300) {
           this.resolved = true;
-          this.setPose('upStrike', 36);
           this.scene.playerUppercut(this.starsSpent);
           if (this.state !== 'uppercut') break;
         }
-        if (this.t >= 660) this.toIdle();
+        if (this.upStep === 2 && this.t >= 400) { this.upStep = 3; this.setPose('upFollow', 11); }
+        if (this.upStep === 3 && this.t >= 540) { this.upStep = 4; this.setPose('idle', 10); }
+        if (this.t >= 720) this.toIdle();
         break;
 
       default:
@@ -211,7 +218,8 @@ export class Player {
     this.resolved = false;
     this.starsSpent = this.stars;
     this.stars = 0;
-    this.setPose('upWind', 22);
+    this.upStep = 0;
+    this.setPose('upDip', 17);
     audio.uppercut();
   }
 
@@ -292,7 +300,9 @@ export class Player {
     const idle = this.state === 'idle' || this.state === 'corner';
     const idleBob = idle ? Math.round(Math.sin(this.clock / 140) * 1.2) : 0;
     const pant = this.winded ? Math.round(Math.sin(this.clock / 60) * 1.5) : 0;
-    const bounce = this.state === 'victory' ? -Math.abs(Math.sin(this.clock / 130)) * 6 : 0;
+    let bounce = this.state === 'victory' ? -Math.abs(Math.sin(this.clock / 130)) * 6 : 0;
+    // The uppercut lifts him off his toes at the top of the swing.
+    if (this.state === 'uppercut' && this.t > 240 && this.t < 520) bounce = -7 * Math.sin((Math.PI * (this.t - 240)) / 280);
     const sway = idle ? Math.sin(this.clock / 190) * 1.5 : 0;
     const c = this.cur;
     this.c.setAngle(c.tilt * (1 - f) + this.fallDir * 80 * f + stagger);
@@ -307,11 +317,12 @@ export class Player {
     this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
 
     // Motion trail on a punch.
-    if (this.state === 'punch' || (this.state === 'uppercut' && this.resolved)) {
+    const upper = this.state === 'uppercut' && this.t > 180 && this.t < 430;
+    if (this.state === 'punch' || upper) {
       this.ghostT = (this.ghostT || 0) - dt;
-      if (this.ghostT <= 0 && this.t < 150) {
-        this.ghostT = 24;
-        const lead = c.ly < c.ry ? this.gl : this.gr;
+      if (this.ghostT <= 0 && (upper || this.t < 150)) {
+        this.ghostT = upper ? 16 : 24;
+        const lead = upper ? this.gr : c.ly < c.ry ? this.gl : this.gr;
         this.scene.ghost('glove_mateo', this.c.x + lead.x, this.c.y + lead.y, lead.scale, lead.flipX, 19);
       }
     }

@@ -105,7 +105,7 @@ export class Opponent {
   chooseMove() {
     if (this.quickNext) return Math.random() < 0.5 ? 'jabL' : 'jabR';
     const w = { ...this.round.weights };
-    if (this.hp / this.d.hp < 0.4) w.signature += 2;
+    if (this.hp / this.d.hp < 0.4 && w.signature != null) w.signature += 2;
     if (this.lastMove === 'signature') w.signature = 0;
     const total = Object.values(w).reduce((s, v) => s + v, 0);
     let roll = Math.random() * total;
@@ -163,7 +163,7 @@ export class Opponent {
         if (flashing && !this.flashOn) audio.flash();
         this.flashOn = flashing;
         this.setGloveFlash(flashing);
-        if (this.moveName === 'signature') this.head.setFlipX(Math.floor(this.t / 110) % 2 === 1);
+        if (this.move.headFlip) this.head.setFlipX(Math.floor(this.t / 110) % 2 === 1);
         if (this.t >= this.tellDur) {
           this.state = 'strike';
           this.t = 0;
@@ -419,6 +419,7 @@ export class Opponent {
     // Little signs of life: gloves drift in the guard and tremble during a wind-up.
     const sway = idle ? Math.sin(this.clock / 230) * 1.5 : 0;
     const shake = this.state === 'tell' ? Math.sin(this.clock / 22) * 1 : 0;
+    const nod = this.state === 'tell' && this.move && this.move.nod ? Math.round(Math.abs(Math.sin(this.t / 90)) * 4) : 0;
     const c = this.cur;
 
     const angle = c.tilt * (1 - f) + this.fallDir * 86 * f + stagger;
@@ -429,7 +430,7 @@ export class Opponent {
       Math.round(this.baseX + c.bx * (1 - f) + this.fallDir * 6 * f),
       Math.round(this.baseY + c.by + this.kick.by + bob + bounce + f * 44 + hop + bounceY),
     );
-    this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble), Math.round(-3 + c.hy + this.kick.hy));
+    this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble), Math.round(-3 + c.hy + this.kick.hy + nod));
     const lx = c.lx + shake; const ly = c.ly + sway;
     const rx = c.rx - shake; const ry = c.ry - sway;
     this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { audio } from '../audio/audio.js';
 import { W } from '../constants.js';
-import tessa from '../data/tessa.js';
+import { currentFight, currentOpponent } from '../data/roster.js';
 import { text } from '../gfx/text.js';
 import { controls } from '../input/controls.js';
 
@@ -10,15 +10,15 @@ export class Intro extends Phaser.Scene {
   constructor() { super('Intro'); }
 
   create() {
-    const opp = tessa;
+    const opp = currentOpponent(this);
     this.cameras.main.setBackgroundColor('#080818');
     const g = this.add.graphics();
     g.fillStyle(0x881400, 1); g.fillRect(0, 26, W / 2, 132);
-    g.fillStyle(0x14204c, 1); g.fillRect(W / 2, 26, W / 2, 132);
+    g.fillStyle(opp.colors.panel || 0x14204c, 1); g.fillRect(W / 2, 26, W / 2, 132);
     g.fillStyle(0xfcfcfc, 1); g.fillRect(0, 24, W, 2); g.fillRect(0, 158, W, 2);
 
     text(this, W / 2, 6, 'MID-MAJOR CIRCUIT', 0xf8b800, 0.5);
-    text(this, W / 2, 15, 'FIGHT 1', 0xfcfcfc, 0.5);
+    text(this, W / 2, 15, `FIGHT ${currentFight(this) + 1}`, 0xfcfcfc, 0.5);
 
     const left = this.add.image(-40, 158, 'portrait_new-mexico').setOrigin(0.5, 1);
     const right = this.add.image(W + 40, 158, `portrait_${opp.key}`).setOrigin(0.5, 1);

@@ -81,6 +81,14 @@ export function makeOpponentBody(scene, key, c) {
     r(c.skin, 19, 0, 10, 4); r(c.skinDark, 19, 3, 10, 1); r(c.skinDark, 22, 4, 4, 2);
     r(c.trim, 14, 0, 5, 5); r(c.trim, 29, 0, 5, 5); r(c.trim, 16, 5, 5, 2); r(c.trim, 27, 5, 5, 2); r(c.trim, 19, 7, 3, 2); r(c.trim, 26, 7, 3, 2);
     r(c.shirtLight, 23, 8, 2, 12); r(PAL.white, 23, 11, 2, 1); r(PAL.white, 23, 15, 2, 1);
+    if (c.yoke) {
+      // quarter-zip pullover: dark yoke across the shoulders, stand collar, zipper
+      r(c.yoke, 8, 0, 32, 4); r(c.yoke, 4, 2, 40, 6); r(c.yoke, 1, 5, 46, 6);
+      r(c.yokeLight, 6, 3, 10, 2); r(c.yokeLight, 32, 3, 10, 2);
+      r(c.skin, 20, 0, 8, 3); r(c.skinDark, 20, 2, 8, 1);
+      r(c.shirt, 15, 0, 5, 6); r(c.shirt, 28, 0, 5, 6); r(c.shirtLight, 15, 0, 2, 5); r(c.shirtDark, 31, 0, 2, 6);
+      r(c.shirt, 20, 4, 8, 7); r(PAL.grey, 23, 3, 2, 16); r(PAL.white, 23, 18, 2, 2);
+    }
     // sleeve hems, chest badge and hem
     r(c.trim, 1, 13, 6, 1); r(c.trim, 41, 13, 6, 1);
     r(c.trim, 30, 15, 7, 2); r(c.shirtLight, 31, 15, 2, 1);

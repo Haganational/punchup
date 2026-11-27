@@ -4,7 +4,9 @@ import headTessa from '../assets/heads/toledo.png';
 import headGreg from '../assets/heads/mount-st-marys.png';
 import portraitMateo from '../assets/portraits/new-mexico.png';
 import portraitTessa from '../assets/portraits/toledo.png';
-import tessa from '../data/tessa.js';
+import headGary from '../assets/heads/bowling-green.png';
+import portraitGary from '../assets/portraits/bowling-green.png';
+import { ROSTER } from '../data/roster.js';
 import { registerFont } from '../gfx/text.js';
 import { makeFx, makeMateo, makeOpponentBody, makeRing, outlineImage } from '../gfx/textures.js';
 
@@ -16,6 +18,8 @@ const IMAGES = {
   'head_mount-st-marys': headGreg,
   'portrait_new-mexico': portraitMateo,
   portrait_toledo: portraitTessa,
+  'head_bowling-green': headGary,
+  'portrait_bowling-green': portraitGary,
 };
 
 function decode(src) {
@@ -39,7 +43,7 @@ export class Boot extends Phaser.Scene {
     makeRing(this);
     makeFx(this);
     makeMateo(this);
-    makeOpponentBody(this, tessa.key, tessa.colors);
+    ROSTER.forEach((f) => makeOpponentBody(this, f.key, f.colors));
     outlineImage(this, 'head_mount-st-marys');
     this.scene.start('Title');
   }

@@ -306,6 +306,16 @@ export class Player {
     this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);
     this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
 
+    // Motion trail on a punch.
+    if (this.state === 'punch' || (this.state === 'uppercut' && this.resolved)) {
+      this.ghostT = (this.ghostT || 0) - dt;
+      if (this.ghostT <= 0 && this.t < 150) {
+        this.ghostT = 24;
+        const lead = c.ly < c.ry ? this.gl : this.gr;
+        this.scene.ghost('glove_mateo', this.c.x + lead.x, this.c.y + lead.y, lead.scale, lead.flipX, 19);
+      }
+    }
+
     this.arms.clear();
     drawArm(this.arms, -16, 7, lx, ly + 3, -1, this.armStyle, c.ls);
     drawArm(this.arms, 16, 7, rx, ry + 3, 1, this.armStyle, c.rs);

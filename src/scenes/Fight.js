@@ -16,7 +16,11 @@ export class Fight extends Phaser.Scene {
 
   create() {
     this.data_ = tessa;
+    this.crowd = this.add.image(0, 36, 'crowd0').setOrigin(0).setDepth(-1);
+    this.crowdT = 0;
+    this.crowdFrame = 0;
     this.add.image(0, 0, 'ring').setOrigin(0);
+    this.shadow = this.add.image(W / 2, 205, 'shadow').setDepth(5);
     this.flashes = this.add.group();
 
     this.opponent = new Opponent(this, this.data_, W / 2, 128);
@@ -88,7 +92,7 @@ export class Fight extends Phaser.Scene {
     g.fillStyle(0xfcfcfc, 1); g.fillRect(8, 60, W - 16, 1); g.fillRect(8, 168, W - 16, 1);
     o.add(g);
     o.add(text(this, W / 2, 44, `END OF ROUND ${this.round}`, 0xf8b800, 0.5));
-    o.add(this.add.image(34, 92, 'head_mount-st-marys'));
+    o.add(this.add.image(34, 92, 'head_mount-st-marys_o'));
     o.add(text(this, 60, 68, 'FATHER GREG:', 0x3cbcfc));
     o.add(text(this, 60, 80, wrap(this.data_.tips[this.round - 1] || 'KEEP YOUR HANDS UP, MY SON.', 23)));
     o.add(text(this, W / 2, 178, 'JUDGES THIS ROUND', 0xbcbcbc, 0.5));
@@ -105,9 +109,27 @@ export class Fight extends Phaser.Scene {
     this.tweens.add({ targets: t, y: y - 14, alpha: 0, duration: 650, ease: 'Quad.easeIn', onComplete: () => t.destroy() });
   }
 
+  // Impact burst, plus a spray of sweat when it lands on the head.
   spark(x, y, big = false) {
-    const s = this.add.image(x, y, 'spark').setDepth(30).setScale(big ? 2 : 1);
-    this.time.delayedCall(big ? 160 : 90, () => s.destroy());
+    const s = this.add.image(x, y, Math.random() < 0.5 ? 'spark' : 'spark2').setDepth(30).setScale(big ? 1.6 : 0.8);
+    this.tweens.add({ targets: s, scale: big ? 2.2 : 1.2, duration: big ? 150 : 90, onComplete: () => s.destroy() });
+    if (y < 120) {
+      for (let i = 0; i < (big ? 7 : 4); i++) {
+        const d = this.add.image(x, y - 4, 'pixel').setDepth(29).setTint(0xa4e4fc).setScale(Math.random() < 0.4 ? 2 : 1);
+        const a = -Math.PI * (0.15 + Math.random() * 0.7);
+        const dist = 12 + Math.random() * 16;
+        this.tweens.add({
+          targets: d, x: x + Math.cos(a) * dist, y: y - 4 + Math.sin(a) * dist + 10, alpha: 0,
+          duration: 320, ease: 'Quad.easeOut', onComplete: () => d.destroy(),
+        });
+      }
+    }
+  }
+
+  // A fading copy of a glove, for motion trails on fast punches.
+  ghost(texture, x, y, scale, flipX, depth) {
+    const g = this.add.image(Math.round(x), Math.round(y), texture).setScale(scale).setFlipX(flipX).setAlpha(0.45).setDepth(depth);
+    this.tweens.add({ targets: g, alpha: 0, duration: 110, onComplete: () => g.destroy() });
   }
 
   playerPunch(hand, zone) {
@@ -383,6 +405,18 @@ export class Fight extends Phaser.Scene {
   // Camera flashes pop in the crowd, more of them when something big happens.
   updateFlashes(dt) {
     this.flashT = Math.max(0, this.flashT - dt);
+    // The crowd bobs to the beat, and jumps with arms up when it goes wild.
+    const wild = this.flashT > 0;
+    this.crowdT -= dt;
+    if (this.crowdT <= 0) {
+      this.crowdT = wild ? 130 : 395;
+      this.crowdFrame = (this.crowdFrame + 1) % 2;
+      this.crowd.setTexture(wild && this.crowdFrame ? 'crowd2' : `crowd${this.crowdFrame}`);
+    }
+    // Tessa's shadow shrinks as she lunges in and stretches when she is down.
+    const o = this.opponent;
+    this.shadow.setPosition(Math.round(o.c.x + o.fallDir * o.fall * 26), 205 - Math.round(o.fall * 22));
+    this.shadow.setScale(0.9 + o.fall * 0.9 + (o.cur.z - 1) * 1.5, 1);
     const chance = this.flashT > 0 ? 0.35 : 0.02;
     if (Math.random() < chance) {
       const f = this.add.image(Phaser.Math.Between(4, W - 4), Phaser.Math.Between(40, 82), 'flashbulb').setDepth(1);

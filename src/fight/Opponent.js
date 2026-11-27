@@ -38,11 +38,14 @@ export class Opponent {
     this.c = scene.add.container(x, y).setDepth(10);
     this.legs = scene.add.image(0, 32, `legs_${key}`).setOrigin(0.5, 0);
     this.torso = scene.add.image(0, -10, `torso_${key}`).setOrigin(0.5, 0);
-    this.head = scene.add.image(0, -4, `head_${key}`).setOrigin(0.5, 1);
+    this.head = scene.add.image(0, -3, `head_${key}_o`).setOrigin(0.5, 1);
     this.arms = scene.add.graphics();
     this.gl = scene.add.image(0, 0, `glove_${key}`);
     this.gr = scene.add.image(0, 0, `glove_${key}`).setFlipX(true);
-    this.c.add([this.legs, this.torso, this.arms, this.head, this.gl, this.gr]);
+    // Stars that circle her head when she is dazed.
+    this.dizzy = [0, 1, 2].map(() => scene.add.image(0, 0, 'dizzy').setVisible(false));
+    this.c.add([this.legs, this.torso, this.arms, this.head, ...this.dizzy, this.gl, this.gr]);
+    this.ghostT = 0;
 
     this.cur = pose('guardHigh');
     this.target = pose('guardHigh');
@@ -426,13 +429,33 @@ export class Opponent {
       Math.round(this.baseX + c.bx * (1 - f) + this.fallDir * 6 * f),
       Math.round(this.baseY + c.by + this.kick.by + bob + bounce + f * 44 + hop + bounceY),
     );
-    this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble), Math.round(-4 + c.hy + this.kick.hy));
+    this.head.setPosition(Math.round(c.hx + this.kick.hx + wobble), Math.round(-3 + c.hy + this.kick.hy));
     const lx = c.lx + shake; const ly = c.ly + sway;
     const rx = c.rx - shake; const ry = c.ry - sway;
     this.gl.setPosition(Math.round(lx), Math.round(ly)).setScale(c.ls);
     this.gr.setPosition(Math.round(rx), Math.round(ry)).setScale(c.rs);
     // The glove closer to the camera draws on top.
     this.c.bringToTop(c.ls >= c.rs ? this.gl : this.gr);
+
+    // Dazed: stars orbit her head. Hurt: her face flushes red.
+    const dazed = this.state === 'stunned' || (this.state === 'down' && this.landed_);
+    this.dizzy.forEach((d, i) => {
+      const a = this.clock / 160 + (i * Math.PI * 2) / 3;
+      d.setVisible(dazed).setPosition(Math.round(this.head.x + Math.cos(a) * 15), Math.round(this.head.y - 40 + Math.sin(a) * 4));
+    });
+    if (this.tintT <= 0) {
+      if (this.hp / this.d.hp < 0.35 && this.state !== 'victory') this.head.setTint(0xfca0a0);
+      else this.head.clearTint();
+    }
+    // Motion trail behind a glove that is flying at the camera.
+    if (this.state === 'strike') {
+      this.ghostT -= dt;
+      if (this.ghostT <= 0) {
+        this.ghostT = 28;
+        const lead = c.ls >= c.rs ? this.gl : this.gr;
+        if (lead.scale > 1.15) this.scene.ghost(lead.texture.key, this.c.x + lead.x * c.z, this.c.y + lead.y * c.z, lead.scale * c.z, lead.flipX, 11);
+      }
+    }
 
     this.arms.clear();
     drawArm(this.arms, -21, 1, lx, ly, -1, this.armStyle, c.ls);

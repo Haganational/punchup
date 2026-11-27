@@ -24,7 +24,7 @@ export class Fight extends Phaser.Scene {
     this.flashes = this.add.group();
 
     this.opponent = new Opponent(this, this.data_, W / 2, 128);
-    this.player = new Player(this, W / 2, 198);
+    this.player = new Player(this, W / 2, 193);
     this.hud = new Hud(this, this.data_.short);
 
     this.bannerBox = this.add.graphics().setDepth(59);
@@ -123,6 +123,21 @@ export class Fight extends Phaser.Scene {
           duration: 320, ease: 'Quad.easeOut', onComplete: () => d.destroy(),
         });
       }
+    }
+  }
+
+  // One bit of a fighter's aura: a lightning flicker, a rising ember or a twinkle.
+  aura(kind, x, y, hot = false, depth = 12) {
+    const a = this.add.image(Math.round(x), Math.round(y), `aura_${kind}`).setDepth(depth);
+    if (kind === 'bolt') {
+      a.setFlipX(Math.random() < 0.5).setAngle(Math.random() < 0.5 ? 0 : 90).setScale(hot && Math.random() < 0.4 ? 2 : 1);
+      if (Math.random() < 0.3) a.setTint(0xfcfcfc);
+      this.time.delayedCall(hot ? 70 : 50, () => a.destroy());
+    } else if (kind === 'ember') {
+      a.setScale(hot && Math.random() < 0.4 ? 2 : 1);
+      this.tweens.add({ targets: a, y: y - (hot ? 22 : 12), x: x + Math.random() * 8 - 4, alpha: 0, duration: hot ? 420 : 520, onComplete: () => a.destroy() });
+    } else {
+      this.tweens.add({ targets: a, y: y + 10, alpha: 0, angle: 90, duration: 380, onComplete: () => a.destroy() });
     }
   }
 

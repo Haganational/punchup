@@ -7,6 +7,7 @@ export default {
   title: 'THE ROOKIE',
   from: 'TOLEDO',
   hp: 120,
+  aura: 'bolt',      // lightning crackles around her gloves
 
   colors: {
     shirt: '#14204c', shirtDark: '#0c1434', shirtLight: '#24347c',
@@ -15,6 +16,7 @@ export default {
     skin: '#e0a078', skinDark: '#b87850',
     glove: '#f8b800', gloveDark: '#ac7c00', gloveLight: '#fce0a8',
     boots: '#14204c',
+    pad: '#14204c', padLight: '#3c54b4', padTrim: '#f8b800',
   },
 
   lines: {

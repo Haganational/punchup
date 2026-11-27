@@ -113,6 +113,15 @@ export function makeOpponentBody(scene, key, c) {
     r(PAL.white, 26, 32, 4, 1); r(PAL.white, 26, 34, 4, 1); r(PAL.white, 26, 36, 4, 1);
     r(PAL.grey, 5, 41, 14, 1); r(PAL.grey, 21, 41, 14, 1);
   }, INK);
+  // Armored shoulder: a round plate with a bright rim and a horn. Mirrored for the other side.
+  canvas(scene, `pad_${key}`, 15, 15, (r) => {
+    const base = c.pad || c.shirtDark; const lit = c.padLight || c.shirt; const rim = c.padTrim || c.trim;
+    r(rim, 2, 0, 3, 2); r(rim, 3, 2, 3, 2); r(PAL.white, 2, 0, 1, 1);
+    r(base, 4, 4, 8, 11); r(base, 2, 5, 12, 9); r(base, 0, 7, 15, 6);
+    r(lit, 4, 5, 6, 2); r(lit, 2, 7, 4, 2); r(PAL.white, 5, 6, 2, 1);
+    r(rim, 0, 12, 15, 1); r(rim, 2, 13, 12, 1); r(rim, 4, 14, 8, 1);
+    r(rim, 7, 8, 2, 2);
+  }, INK);
   makeGlove(scene, `glove_${key}`, c.glove, c.gloveDark, c.gloveLight);
   outlineImage(scene, `head_${key}`);
 }
@@ -125,25 +134,35 @@ export function outlineImage(scene, key) {
 }
 
 export function makeMateo(scene) {
-  const red = PAL.cherry; const dk = '#880018'; const lt = '#f85878'; const sil = PAL.grey; const hi = PAL.white;
-  // Back of the torso: cherry-red bodysuit with silver sequin chevrons.
-  canvas(scene, 'mateo_body', 40, 46, (r) => {
-    r(red, 8, 0, 24, 4); r(red, 3, 2, 34, 6); r(red, 0, 5, 40, 10); r(red, 5, 12, 30, 34);
-    // broad shoulders catch the light, the spine and sides fall into shadow
-    r(lt, 5, 3, 9, 2); r(lt, 26, 3, 9, 2); r(lt, 2, 6, 5, 2); r(lt, 33, 6, 5, 2);
-    r(dk, 5, 16, 3, 30); r(dk, 32, 16, 3, 30); r(dk, 0, 13, 5, 2); r(dk, 35, 13, 5, 2);
-    r(dk, 19, 2, 2, 40);
-    for (let row = 0; row < 5; row++) {
-      const y = 7 + row * 7;
-      for (let i = 0; i < 6; i++) {
-        r(sil, 19 - 2 - i * 2, y + i, 2, 2);
-        r(sil, 21 + i * 2, y + i, 2, 2);
-      }
-      r(hi, 17, y, 1, 1); r(hi, 22, y, 1, 1);
+  const red = PAL.cherry; const dk = '#880018'; const sil = PAL.grey; const hi = PAL.white;
+  const skin = '#d09060'; const skDk = '#a86838'; const skLt = '#eab888';
+  // Ring gear: bare, muscled back with a silver sequin harness and cherry-red
+  // sequined trunks under a wide silver belt.
+  canvas(scene, 'mateo_body', 46, 46, (r) => {
+    // silhouette: thick traps, wide shoulders, tapering to a narrow waist
+    r(skin, 15, 0, 16, 3); r(skin, 7, 1, 32, 4); r(skin, 2, 3, 42, 6); r(skin, 0, 5, 46, 8);
+    r(skin, 3, 13, 40, 6); r(skin, 6, 19, 34, 6); r(skin, 9, 25, 28, 5); r(skin, 11, 30, 24, 4);
+    // light on the traps, shoulders and the wings of the back
+    r(skLt, 16, 1, 5, 1); r(skLt, 25, 1, 5, 1); r(skLt, 3, 5, 7, 2); r(skLt, 36, 5, 7, 2); r(skLt, 1, 7, 3, 3); r(skLt, 42, 7, 3, 3);
+    r(skLt, 12, 13, 6, 2); r(skLt, 28, 13, 6, 2); r(skLt, 8, 19, 4, 3); r(skLt, 34, 19, 4, 3);
+    // shadow: spine, shoulder blades, under the lats, lower back
+    r(skDk, 22, 2, 2, 31);
+    r(skDk, 12, 9, 8, 1); r(skDk, 26, 9, 8, 1); r(skDk, 11, 10, 1, 5); r(skDk, 34, 10, 1, 5); r(skDk, 13, 16, 6, 1); r(skDk, 27, 16, 6, 1);
+    r(skDk, 0, 12, 4, 1); r(skDk, 42, 12, 4, 1); r(skDk, 3, 14, 2, 5); r(skDk, 41, 14, 2, 5);
+    r(skDk, 6, 20, 2, 5); r(skDk, 38, 20, 2, 5); r(skDk, 9, 26, 2, 4); r(skDk, 35, 26, 2, 4);
+    r(skDk, 18, 28, 2, 2); r(skDk, 26, 28, 2, 2); r(skDk, 15, 23, 5, 1); r(skDk, 26, 23, 5, 1);
+    // harness: two sequin straps crossing over a gold star medallion
+    for (let i = 0; i < 15; i++) {
+      const y = 3 + i * 2; const x = Math.round(9 + i * 1.75);
+      r(sil, x, y, 3, 2); r(sil, 43 - x, y, 3, 2);
+      if (i % 3 === 0) { r(hi, x, y, 1, 1); r(hi, 45 - x, y, 1, 1); }
     }
-    r(sil, 1, 10, 4, 2); r(sil, 35, 10, 4, 2);
-    // silver belt
-    r(sil, 5, 41, 30, 5); r(hi, 5, 41, 30, 1); r(PAL.dkGrey, 5, 45, 30, 1); r(PAL.gold, 17, 42, 6, 3);
+    r(PAL.gold, 20, 15, 6, 6); r(PAL.gold, 22, 13, 2, 10); r(PAL.gold, 18, 17, 10, 2); r(PAL.yellow, 22, 16, 2, 3); r(hi, 22, 17, 1, 1);
+    // trunks
+    r(red, 10, 34, 26, 12); r(red, 9, 38, 28, 8);
+    r(dk, 9, 38, 2, 8); r(dk, 35, 38, 2, 8); r(dk, 22, 39, 2, 7);
+    for (let y = 39; y < 46; y += 2) for (let x = 12 + (y % 4); x < 35; x += 4) r(sil, x, y, 1, 1);
+    r(sil, 10, 33, 26, 5); r(hi, 10, 33, 26, 1); r(PAL.dkGrey, 10, 37, 26, 1); r(PAL.gold, 19, 34, 8, 3); r(PAL.yellow, 21, 35, 4, 1);
   }, INK);
   // Back of the head: dark faded haircut.
   canvas(scene, 'mateo_head', 18, 20, (r) => {
@@ -261,6 +280,10 @@ export function makeRing(scene) {
 }
 
 export function makeFx(scene) {
+  // Aura bits that crackle or burn around a fighter's gloves.
+  canvas(scene, 'aura_bolt', 5, 9, (r) => bitmap(r, ['...##', '..##.', '.##..', '####.', '.####', '..##.', '.##..', '##...', '#....'], { '#': PAL.yellow }));
+  canvas(scene, 'aura_ember', 5, 6, (r) => bitmap(r, ['..o..', '.oo..', '.oyo.', 'oyyo.', 'oywyo', '.oyo.'], { o: PAL.orange, y: PAL.gold, w: PAL.white }));
+  canvas(scene, 'aura_twinkle', 5, 5, (r) => bitmap(r, ['..#..', '..#..', '##w##', '..#..', '..#..'], { '#': PAL.white, w: PAL.yellow }));
   const starRows = [
     '....#....',
     '....#....',

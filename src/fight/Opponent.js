@@ -44,7 +44,10 @@ export class Opponent {
     this.gr = scene.add.image(0, 0, `glove_${key}`).setFlipX(true);
     // Stars that circle her head when she is dazed.
     this.dizzy = [0, 1, 2].map(() => scene.add.image(0, 0, 'dizzy').setVisible(false));
-    this.c.add([this.legs, this.torso, this.arms, this.head, ...this.dizzy, this.gl, this.gr]);
+    this.padL = scene.add.image(-23, 0, `pad_${key}`);
+    this.padR = scene.add.image(23, 0, `pad_${key}`).setFlipX(true);
+    this.auraT = 0;
+    this.c.add([this.legs, this.torso, this.arms, this.padL, this.padR, this.head, ...this.dizzy, this.gl, this.gr]);
     this.ghostT = 0;
 
     this.cur = pose('guardHigh');
@@ -55,7 +58,7 @@ export class Opponent {
     this.fallT = 0;
     this.fallDir = 1;
     this.armStyle = {
-      upper: 15, fore: 15, width: 6,
+      upper: 15, fore: 15, width: 7, upperWidth: 9,
       skin: num(data.colors.skin), outline: num(data.colors.skinDark),
       sleeve: num(data.colors.shirt), sleeveOutline: num(data.colors.shirtDark), sleeveTo: 0.5,
     };
@@ -455,6 +458,18 @@ export class Opponent {
         this.ghostT = 28;
         const lead = c.ls >= c.rs ? this.gl : this.gr;
         if (lead.scale > 1.15) this.scene.ghost(lead.texture.key, this.c.x + lead.x * c.z, this.c.y + lead.y * c.z, lead.scale * c.z, lead.flipX, 11);
+      }
+    }
+
+    // Aura: quiet in the guard, wild while a punch is charging or flying.
+    if (this.d.aura && this.state !== 'down' && this.state !== 'stunned') {
+      const hot = this.state === 'tell' || this.state === 'strike';
+      this.auraT -= dt;
+      if (this.auraT <= 0) {
+        this.auraT = hot ? (this.move && this.move.announce ? 28 : 55) : 260;
+        const glove = Math.random() < 0.5 ? this.gl : this.gr;
+        const r = 7 * glove.scale + (hot ? 4 : 1);
+        this.scene.aura(this.d.aura, this.c.x + (glove.x + (Math.random() * 2 - 1) * r) * c.z, this.c.y + (glove.y + (Math.random() * 2 - 1) * r) * c.z, hot);
       }
     }
 

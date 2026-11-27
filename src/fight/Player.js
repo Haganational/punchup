@@ -14,6 +14,7 @@ const POSES = {
   headR: { lx: -20, ly: -2, rx: 4, ry: -76, rs: 0.75, bx: -3, by: -7, tilt: -8, z: 0.95 },
   dodgeL: { lx: -18, ly: -12, rx: 16, ry: -8, bx: -38, by: 6, tilt: -16 },
   dodgeR: { lx: -16, ly: -8, rx: 18, ry: -12, bx: 38, by: 6, tilt: 16 },
+  duck: { lx: -11, ly: -9, rx: 11, ry: -9, by: 27, z: 1.06 },
   hit: { lx: -26, ly: 2, rx: 26, ry: 2, by: 7 },
   winded: { lx: -24, ly: 10, rx: 24, ry: 10, by: 4 },
   // Star uppercut: sink and coil, scoop up through the middle, burst, follow through.
@@ -33,7 +34,10 @@ const PUNCH_TOTAL = 240;
 const DODGE_MIN = 340;      // a tap keeps Mateo safe this long
 const DODGE_HOLD = 680;     // holding the direction keeps him leaning out this long
 const DODGE_RECOVER = 80;   // time to come back to center
-const BUFFER_MS = 180;      // a dodge pressed slightly early still comes out
+const BUFFER_MS = 180;
+const DOUBLE_TAP = 280;     // two presses of down this close together = duck
+const DUCK_MIN = 380;       // a duck keeps Mateo low this long
+const DUCK_HOLD = 720;      // holding down keeps him low this long      // a dodge pressed slightly early still comes out
 
 export class Player {
   constructor(scene, x, y) {
@@ -84,6 +88,7 @@ export class Player {
   setPose(name, rate = 20) { this.target = pose(name); this.rate = rate; }
   toIdle() { this.state = 'idle'; this.t = 0; this.queued = null; }
   dodgeSafe() { return this.state === 'dodge' && this.dodgeEnd == null; }
+  duckSafe() { return this.state === 'duck' && this.dodgeEnd == null; }
 
   spendGas(n) {
     if (this.winded) return;
@@ -115,12 +120,19 @@ export class Player {
     if (pressedDodge) this.buffered = { dir: pressedDodge, ms: BUFFER_MS };
     else if (this.buffered) { this.buffered.ms -= dt; if (this.buffered.ms <= 0) this.buffered = null; }
     const wantDodge = this.buffered ? this.buffered.dir : null;
+    // Double-tap down to duck. A single press (or hold) is still a block.
+    let wantDuck = false;
+    if (controls.justDown('down')) {
+      wantDuck = this.clock - (this.lastDownAt ?? -9999) < DOUBLE_TAP;
+      this.lastDownAt = wantDuck ? -9999 : this.clock;
+    }
     const wantPunch = controls.justDown('punchL') ? 'L' : controls.justDown('punchR') ? 'R' : null;
     const zone = controls.isDown('up') ? 'head' : 'body';
 
     switch (this.state) {
       case 'idle':
-        if (wantDodge) this.startDodge(wantDodge);
+        if (wantDuck) this.startDuck();
+        else if (wantDodge) this.startDodge(wantDodge);
         else if (controls.isDown('down')) { this.state = 'block'; this.t = 0; }
         else if (!this.winded && controls.justDown('star') && this.stars > 0) this.startUppercut();
         else if (!this.winded && (wantPunch || this.queued)) {
@@ -131,7 +143,8 @@ export class Player {
 
       case 'block':
         this.setPose('block', 26);
-        if (wantDodge) this.startDodge(wantDodge);
+        if (wantDuck) this.startDuck();
+        else if (wantDodge) this.startDodge(wantDodge);
         else if (!controls.isDown('down')) this.toIdle();
         break;
 
@@ -142,6 +155,7 @@ export class Player {
           if (this.state !== 'punch') break;
         }
         if (wantPunch) this.queued = { hand: wantPunch, zone };
+        if (wantDuck) { this.startDuck(); break; }
         if (wantDodge) { this.startDodge(wantDodge); break; }   // a dodge always beats a punch
         if (this.t >= PUNCH_IMPACT + 50) this.setPose('idle', 22);
         if (this.t >= PUNCH_TOTAL) { const q = this.queued; this.toIdle(); this.queued = q; }
@@ -158,6 +172,23 @@ export class Player {
           if (counterNow || this.t >= DODGE_HOLD || (this.t >= DODGE_MIN && !held)) {
             this.dodgeEnd = this.t;
             this.setPose('idle', 26);
+            if (counterNow) { const q = this.queued; this.startPunch(q.hand, q.zone); break; }
+          }
+        } else if (this.t >= this.dodgeEnd + DODGE_RECOVER) {
+          const q = this.queued; this.toIdle(); this.queued = q;
+        }
+        break;
+      }
+
+      case 'duck': {
+        if (wantDodge) { this.startDodge(wantDodge); break; }
+        if (wantPunch) this.queued = { hand: wantPunch, zone };
+        if (this.dodgeEnd == null) {
+          const oppDone = ['open', 'stunned'].includes(this.scene.opponent.state);
+          const counterNow = this.queued && oppDone && this.t >= 140;
+          if (counterNow || this.t >= DUCK_HOLD || (this.t >= DUCK_MIN && !controls.isDown('down'))) {
+            this.dodgeEnd = this.t;
+            this.setPose('idle', 24);
             if (counterNow) { const q = this.queued; this.startPunch(q.hand, q.zone); break; }
           }
         } else if (this.t >= this.dodgeEnd + DODGE_RECOVER) {
@@ -212,6 +243,16 @@ export class Player {
     audio.dodge();
   }
 
+  startDuck() {
+    this.state = 'duck';
+    this.t = 0;
+    this.queued = null;
+    this.buffered = null;
+    this.dodgeEnd = null;
+    this.setPose('duck', 34);
+    audio.dodge();
+  }
+
   startUppercut() {
     this.state = 'uppercut';
     this.t = 0;
@@ -228,6 +269,11 @@ export class Player {
     if (this.state === 'down') return 'dodged';
     if (this.dodgeSafe()) {
       this.scene.popup('DODGE!', this.baseX, this.baseY - 44, 0x58f898);
+      return 'dodged';
+    }
+    // A duck slips under hooks and other high punches, but not straight ones.
+    if (this.duckSafe() && (strike.hook || strike.high)) {
+      this.scene.popup('DUCK!', this.baseX, this.baseY - 44, 0x58f898);
       return 'dodged';
     }
     if (this.state === 'block' && strike.blockable) {
@@ -339,7 +385,7 @@ export class Player {
       this.sparkle.clear();
       this.sparkle.fillStyle(0xfcfcfc, 1);
       for (let i = 0; i < 5; i++) {
-        this.sparkle.fillRect(-12 + Math.floor(Math.random() * 24), 33 + Math.floor(Math.random() * 11), 1, 1);
+        this.sparkle.fillRect(-12 + Math.floor(Math.random() * 24), 34 + Math.floor(Math.random() * 15), 1, 1);
       }
     }
     const blue = this.winded && Math.floor(this.clock / 120) % 2 === 0;

@@ -31,7 +31,7 @@ export default {
   // Father Greg's corner advice after rounds 1 and 2.
   tips: [
     'SHE DROPS HER HANDS AFTER EVERY JAB, MY SON. DODGE IT, THEN GO TO THE BODY.',
-    'WHEN SHE FLIPS THAT HAIR, TWO PUNCHES ARE COMING. DODGE BOTH AND MAKE HER PAY.',
+    'WHEN SHE FLIPS THAT HAIR, TWO PUNCHES ARE COMING. DODGE BOTH. HER HOOK YOU CAN DUCK: TAP DOWN TWICE.',
   ],
 
   // How she behaves when nobody is throwing.

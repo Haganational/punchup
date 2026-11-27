@@ -95,7 +95,9 @@ export function makeOpponentBody(scene, key, c) {
       r(c.shirt, 12, 1, 4, 5); r(c.shirt, 32, 1, 4, 5);
       r(c.shirt, 8, 5, 32, 15); r(c.shirt, 7, 8, 34, 10);
       r(s, 18, 4, 12, 3); r(s, 20, 7, 8, 2); r(s, 22, 9, 4, 2); r(d, 23, 9, 2, 3);
-      r(c.shirtLight, 10, 9, 9, 4); r(c.shirtLight, 29, 9, 9, 4); r(PAL.white, 12, 10, 3, 1); r(PAL.white, 31, 10, 3, 1);
+      r(c.shirtLight, 9, 8, 11, 5); r(c.shirtLight, 28, 8, 11, 5); r(c.shirtLight, 8, 10, 3, 4); r(c.shirtLight, 37, 10, 3, 4);
+      r(PAL.white, 11, 9, 4, 1); r(PAL.white, 30, 9, 4, 1); r(PAL.white, 10, 10, 1, 2); r(PAL.white, 29, 10, 1, 2);
+      r(c.shirtDark, 19, 13, 3, 4); r(c.shirtDark, 26, 13, 3, 4); r(d, 23, 7, 2, 5);
       r(c.shirtDark, 23, 12, 2, 7); r(c.shirtDark, 8, 16, 14, 2); r(c.shirtDark, 26, 16, 14, 2); r(c.shirtDark, 10, 18, 10, 1); r(c.shirtDark, 28, 18, 10, 1);
       r(c.shirt, 6, 10, 36, 7); r(c.shirt, 9, 20, 13, 1); r(c.shirt, 26, 20, 13, 1); r(c.shirtDark, 10, 19, 11, 1); r(c.shirtDark, 27, 19, 11, 1);
       r(c.trim, 10, 21, 11, 1); r(c.trim, 27, 21, 11, 1); r(c.trim, 21, 20, 6, 1); r(c.trim, 12, 1, 1, 5); r(c.trim, 35, 1, 1, 5);
@@ -198,7 +200,7 @@ export function makeMateo(scene) {
   const skin = '#d09060'; const skDk = '#a86838'; const skLt = '#eab888';
   // Ring gear: bare, muscled back with a silver sequin harness and cherry-red
   // sequined trunks under a wide silver belt.
-  canvas(scene, 'mateo_body', 46, 46, (r) => {
+  canvas(scene, 'mateo_body', 46, 52, (r) => {
     // silhouette: thick traps, wide shoulders, tapering to a narrow waist
     r(skin, 15, 0, 16, 3); r(skin, 7, 1, 32, 4); r(skin, 2, 3, 42, 6); r(skin, 0, 5, 46, 8);
     r(skin, 3, 13, 40, 6); r(skin, 6, 19, 34, 6); r(skin, 9, 25, 28, 5); r(skin, 11, 30, 24, 4);
@@ -218,11 +220,17 @@ export function makeMateo(scene) {
       if (i % 3 === 0) { r(hi, x, y, 1, 1); r(hi, 45 - x, y, 1, 1); }
     }
     r(PAL.gold, 20, 15, 6, 6); r(PAL.gold, 22, 13, 2, 10); r(PAL.gold, 18, 17, 10, 2); r(PAL.yellow, 22, 16, 2, 3); r(hi, 22, 17, 1, 1);
-    // trunks
-    r(red, 10, 34, 26, 12); r(red, 9, 38, 28, 8);
-    r(dk, 9, 38, 2, 8); r(dk, 35, 38, 2, 8); r(dk, 22, 39, 2, 7);
-    for (let y = 39; y < 46; y += 2) for (let x = 12 + (y % 4); x < 35; x += 4) r(sil, x, y, 1, 1);
+    // trunks: snug, rounded and shaded, with a seam and sequins
+    const lt = '#f85878';
+    r(red, 10, 34, 26, 6); r(red, 9, 38, 28, 12); r(red, 10, 50, 11, 2); r(red, 25, 50, 11, 2);
+    r(lt, 12, 39, 8, 2); r(lt, 26, 39, 8, 2); r(lt, 11, 41, 4, 4); r(lt, 31, 41, 4, 4); r(hi, 13, 40, 2, 1); r(hi, 31, 40, 2, 1);
+    r(dk, 22, 38, 2, 14); r(dk, 21, 46, 4, 4);
+    r(dk, 9, 44, 1, 6); r(dk, 36, 44, 1, 6);
+    r(dk, 11, 49, 9, 1); r(dk, 26, 49, 9, 1); r(dk, 13, 50, 8, 1); r(dk, 25, 50, 8, 1); r(dk, 16, 47, 5, 2); r(dk, 25, 47, 5, 2);
+    for (let y = 43; y < 49; y += 2) for (let x = 12 + (y % 4); x < 35; x += 5) if (x < 21 || x > 24) r(sil, x, y, 1, 1);
     r(sil, 10, 33, 26, 5); r(hi, 10, 33, 26, 1); r(PAL.dkGrey, 10, 37, 26, 1); r(PAL.gold, 19, 34, 8, 3); r(PAL.yellow, 21, 35, 4, 1);
+    // tops of the thighs
+    r(skin, 10, 51, 10, 1); r(skin, 26, 51, 10, 1);
   }, INK);
   // Back of the head: dark faded haircut.
   canvas(scene, 'mateo_head', 18, 20, (r) => {

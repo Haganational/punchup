@@ -67,6 +67,45 @@ export function makeGlove(scene, key, base, dark, light) {
 export function makeOpponentBody(scene, key, c) {
   // Torso: a polo shirt seen from the front, with rounded shoulders and shading.
   canvas(scene, `torso_${key}`, 48, 44, (r) => {
+    const s = c.skin; const d = c.skinDark; const l = c.skinLight || '#f8c8a0';
+    if (c.body === 'bare') {
+      // Shirtless: thick neck and traps, slab pecs, a six-pack and a title-style waistband.
+      r(s, 19, 0, 10, 4); r(s, 10, 1, 28, 3); r(s, 4, 2, 40, 6); r(s, 1, 5, 46, 9);
+      r(s, 6, 12, 36, 10); r(s, 8, 22, 32, 8); r(s, 10, 30, 28, 14);
+      r(l, 5, 3, 9, 2); r(l, 34, 3, 9, 2); r(l, 2, 6, 5, 2); r(l, 41, 6, 5, 2);
+      r(l, 10, 8, 11, 4); r(l, 27, 8, 11, 4);
+      r(d, 14, 5, 8, 1); r(d, 26, 5, 8, 1); r(d, 23, 5, 2, 13);
+      r(d, 8, 16, 14, 1); r(d, 26, 16, 14, 1); r(d, 9, 17, 12, 1); r(d, 27, 17, 12, 1);
+      r(d, 1, 12, 5, 2); r(d, 42, 12, 5, 2); r(d, 6, 14, 2, 8); r(d, 40, 14, 2, 8);
+      r(d, 8, 22, 2, 8); r(d, 38, 22, 2, 8); r(d, 10, 30, 2, 14); r(d, 36, 30, 2, 14);
+      r(d, 12, 22, 2, 2); r(d, 34, 22, 2, 2); r(d, 13, 26, 2, 2); r(d, 33, 26, 2, 2);
+      r(d, 23, 19, 2, 22); r(d, 17, 24, 14, 1); r(d, 17, 30, 14, 1); r(d, 18, 36, 12, 1);
+      [20, 26, 32].forEach((y) => { r(l, 18, y, 4, 3); r(l, 26, y, 4, 3); });
+      if (c.chestHair) for (let i = 0; i < 16; i++) r(c.chestHair, 13 + ((i * 7) % 22), 9 + ((i * 5) % 7), 1, 1);
+      r(c.trim, 10, 40, 28, 4); r(PAL.gold, 20, 39, 8, 5); r(PAL.yellow, 22, 40, 4, 2);
+      return;
+    }
+    if (c.body === 'top') {
+      // Powerhouse: cut shoulders, a fitted crop top, bare abs and strong hips.
+      r(s, 19, 0, 10, 4); r(s, 11, 1, 26, 3); r(s, 4, 2, 40, 6); r(s, 1, 5, 46, 8);
+      r(s, 7, 13, 34, 8); r(s, 9, 21, 30, 3); r(s, 11, 24, 26, 8); r(s, 9, 32, 30, 12);
+      r(l, 5, 3, 8, 2); r(l, 35, 3, 8, 2); r(l, 2, 6, 5, 2); r(l, 41, 6, 5, 2);
+      r(d, 1, 12, 5, 1); r(d, 42, 12, 5, 1);
+      // the top: straps, sweetheart neckline, rounded shading, bright hem
+      r(c.shirt, 12, 1, 4, 5); r(c.shirt, 32, 1, 4, 5);
+      r(c.shirt, 8, 5, 32, 15); r(c.shirt, 7, 8, 34, 10);
+      r(s, 18, 4, 12, 3); r(s, 20, 7, 8, 2); r(s, 22, 9, 4, 2); r(d, 23, 9, 2, 3);
+      r(c.shirtLight, 10, 9, 9, 4); r(c.shirtLight, 29, 9, 9, 4); r(PAL.white, 12, 10, 3, 1); r(PAL.white, 31, 10, 3, 1);
+      r(c.shirtDark, 23, 12, 2, 7); r(c.shirtDark, 8, 16, 14, 2); r(c.shirtDark, 26, 16, 14, 2); r(c.shirtDark, 10, 18, 10, 1); r(c.shirtDark, 28, 18, 10, 1);
+      r(c.shirt, 6, 10, 36, 7); r(c.shirt, 9, 20, 13, 1); r(c.shirt, 26, 20, 13, 1); r(c.shirtDark, 10, 19, 11, 1); r(c.shirtDark, 27, 19, 11, 1);
+      r(c.trim, 10, 21, 11, 1); r(c.trim, 27, 21, 11, 1); r(c.trim, 21, 20, 6, 1); r(c.trim, 12, 1, 1, 5); r(c.trim, 35, 1, 1, 5);
+      r(c.trim, 22, 13, 4, 3); r(PAL.white, 23, 14, 1, 1);
+      // midriff: abs, obliques and hip shadows
+      r(d, 23, 22, 2, 19); r(d, 17, 26, 14, 1); r(d, 17, 32, 14, 1); r(d, 18, 38, 12, 1);
+      [22, 28, 34].forEach((y) => { r(l, 18, y, 4, 3); r(l, 26, y, 4, 3); });
+      r(d, 9, 21, 2, 3); r(d, 37, 21, 2, 3); r(d, 11, 24, 2, 8); r(d, 35, 24, 2, 8); r(d, 9, 33, 2, 11); r(d, 37, 33, 2, 11);
+      return;
+    }
     r(c.shirt, 8, 0, 32, 4); r(c.shirt, 4, 2, 40, 6); r(c.shirt, 1, 5, 46, 9); r(c.shirt, 6, 12, 36, 32);
     r(c.shirt, 7, 40, 34, 4);
     // light from above: bright shoulders and chest

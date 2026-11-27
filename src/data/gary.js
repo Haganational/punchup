@@ -11,8 +11,8 @@ export default {
 
   colors: {
     shirt: '#d8501c', shirtDark: '#9c3008', shirtLight: '#f88048',
-    yoke: '#58301c', yokeLight: '#7c4c30', zip: true,
-    trim: '#58301c',
+    body: 'bare', skinLight: '#fcd0b0', chestHair: '#bcbcbc',
+    trim: '#d8501c',
     trunks: '#58301c', trunksDark: '#381c0c', stripe: '#d8501c',
     skin: '#e8b090', skinDark: '#b87858',
     glove: '#7c4420', gloveDark: '#48240c', gloveLight: '#c08858',

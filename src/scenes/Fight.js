@@ -24,7 +24,7 @@ export class Fight extends Phaser.Scene {
     this.flashes = this.add.group();
 
     this.opponent = new Opponent(this, this.data_, W / 2, 128);
-    this.player = new Player(this, W / 2, 193);
+    this.player = new Player(this, W / 2, 188);
     this.hud = new Hud(this, this.data_.short);
 
     this.bannerBox = this.add.graphics().setDepth(59);

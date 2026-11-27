@@ -32,8 +32,8 @@ export class Title extends Phaser.Scene {
     text(this, W / 2, 192, 'Z / X  LEFT / RIGHT PUNCH', 0xbcbcbc, 0.5);
     text(this, W / 2, 201, 'HOLD UP TO AIM AT THE HEAD', 0xbcbcbc, 0.5);
     text(this, W / 2, 210, 'LEFT/RIGHT DODGE, HOLD = LONGER', 0xbcbcbc, 0.5);
-    text(this, W / 2, 220, 'DOWN BLOCK   ENTER UPPERCUT', 0xf8b800, 0.5);
-    text(this, W / 2, 231, 'M MUTE   ESC PAUSE', 0x7c7c7c, 0.5);
+    text(this, W / 2, 220, 'DOWN BLOCK, TAP TWICE = DUCK', 0xf8b800, 0.5);
+    text(this, W / 2, 231, 'ENTER STAR UPPERCUT   M MUTE', 0x7c7c7c, 0.5);
 
     this.blink = 0;
     audio.playMusic('title');

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Punchup</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center;
+             touch-action: none; -webkit-user-select: none; user-select: none; font-family: monospace; }
+      #game { display: flex; align-items: center; justify-content: center; }
+      #game canvas { image-rendering: pixelated; display: block; }
+      #pad { display: none; width: 100%; max-width: 520px; padding: 10px 12px 14px; box-sizing: border-box;
+             justify-content: space-between; align-items: center; }
+      body.touch #pad { display: flex; }
+      .cluster { display: grid; gap: 6px; }
+      .dpad { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); }
+      .fists { grid-template-columns: repeat(2, 64px); grid-template-rows: 44px 64px; }
+      #pad button { background: #1c1c3c; color: #fcfcfc; border: 2px solid #7c7c7c; border-radius: 10px;
+                    font: bold 15px monospace; touch-action: none; -webkit-tap-highlight-color: transparent; }
+      #pad button.on { background: #e40058; border-color: #fcfcfc; }
+      #pad .star { grid-column: 1 / span 2; background: #503000; color: #f8b800; }
+      #pad .fist { background: #881400; }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="pad" aria-label="Touch controls">
+      <div class="cluster dpad">
+        <span></span><button data-action="up">HEAD</button><span></span>
+        <button data-action="left">&#9664;</button>
+        <button data-action="down">BLOCK</button>
+        <button data-action="right">&#9654;</button>
+      </div>
+      <div class="cluster fists">
+        <button class="star" data-action="star">&#9733; UPPERCUT</button>
+        <button class="fist" data-action="punchL">L</button>
+        <button class="fist" data-action="punchR">R</button>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

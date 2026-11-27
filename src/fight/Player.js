@@ -41,7 +41,7 @@ export class Player {
     this.baseX = x;
     this.baseY = y;
     this.c = scene.add.container(x, y).setDepth(20);
-    this.body = scene.add.image(0, 0, 'mateo_body').setOrigin(0.5, 0);
+    this.body = scene.add.image(0, -1, 'mateo_body').setOrigin(0.5, 0);
     this.head = scene.add.image(0, -17, 'mateo_head').setOrigin(0.5, 0);
     this.arms = scene.add.graphics();
     this.sparkle = scene.add.graphics();
@@ -57,8 +57,8 @@ export class Player {
     this.fallT = 0;
     this.fallDir = 1;
     this.armStyle = {
-      upper: 14, fore: 14, width: 6, sleeveTo: 0,
-      skin: num(PAL.cherry), outline: 0x880018, cuff: 0xbcbcbc,
+      upper: 14, fore: 14, width: 7, upperWidth: 9, sleeveTo: 0,
+      skin: 0xd09060, outline: 0x804820, cuff: 0xbcbcbc,
     };
     this.tintT = 0;
     this.fullReset();
@@ -322,14 +322,15 @@ export class Player {
       this.ghostT = (this.ghostT || 0) - dt;
       if (this.ghostT <= 0 && (upper || this.t < 150)) {
         this.ghostT = upper ? 16 : 24;
+        if (upper) this.scene.aura('twinkle', this.c.x + this.gr.x + Math.random() * 10 - 5, this.c.y + this.gr.y + Math.random() * 10 - 5, true, 21);
         const lead = upper ? this.gr : c.ly < c.ry ? this.gl : this.gr;
         this.scene.ghost('glove_mateo', this.c.x + lead.x, this.c.y + lead.y, lead.scale, lead.flipX, 19);
       }
     }
 
     this.arms.clear();
-    drawArm(this.arms, -16, 7, lx, ly + 3, -1, this.armStyle, c.ls);
-    drawArm(this.arms, 16, 7, rx, ry + 3, 1, this.armStyle, c.rs);
+    drawArm(this.arms, -19, 6, lx, ly + 3, -1, this.armStyle, c.ls);
+    drawArm(this.arms, 19, 6, rx, ry + 3, 1, this.armStyle, c.rs);
 
     // Sequins: a few pixels twinkle on the bodysuit.
     this.sparkT -= dt;
@@ -338,7 +339,7 @@ export class Player {
       this.sparkle.clear();
       this.sparkle.fillStyle(0xfcfcfc, 1);
       for (let i = 0; i < 5; i++) {
-        this.sparkle.fillRect(-14 + Math.floor(Math.random() * 28), 3 + Math.floor(Math.random() * 38), 1, 1);
+        this.sparkle.fillRect(-12 + Math.floor(Math.random() * 24), 33 + Math.floor(Math.random() * 11), 1, 1);
       }
     }
     const blue = this.winded && Math.floor(this.clock / 120) % 2 === 0;

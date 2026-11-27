@@ -7,6 +7,7 @@ export default {
   title: 'THE OLD PRO',
   from: 'BOWLING GREEN',
   hp: 140,
+  aura: 'ember',     // his gloves smolder
 
   colors: {
     shirt: '#d8501c', shirtDark: '#9c3008', shirtLight: '#f88048',
@@ -16,6 +17,7 @@ export default {
     skin: '#e8b090', skinDark: '#b87858',
     glove: '#7c4420', gloveDark: '#48240c', gloveLight: '#c08858',
     boots: '#381c0c',
+    pad: '#58301c', padLight: '#9c6038', padTrim: '#f8b800',
     panel: 0x7c2c08,
   },
 

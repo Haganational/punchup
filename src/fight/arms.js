@@ -43,10 +43,11 @@ export function drawArm(g, sx, sy, gx, gy, side, style, gloveScale = 1) {
   const e = elbowFor(sx, sy, gx, gy, style.upper, style.fore, side);
   const w = style.width;
   // Upper arm: skin first, then the sleeve over the part nearest the shoulder.
-  segment(g, sx, sy, e.x, e.y, w, style.skin, style.outline);
+  const uw = style.upperWidth ?? w;
+  segment(g, sx, sy, e.x, e.y, uw, style.skin, style.outline);
   if (style.sleeveTo > 0) {
     const t = style.sleeveTo;
-    segment(g, sx, sy, sx + (e.x - sx) * t, sy + (e.y - sy) * t, w + 1, style.sleeve, style.sleeveOutline ?? style.outline);
+    segment(g, sx, sy, sx + (e.x - sx) * t, sy + (e.y - sy) * t, uw + 1, style.sleeve, style.sleeveOutline ?? style.outline);
   }
   // Forearm gets thicker as the glove comes toward the camera.
   const fw = Math.max(3, Math.round(w * (0.85 + 0.25 * (gloveScale - 1))));

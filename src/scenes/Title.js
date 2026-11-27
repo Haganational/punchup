@@ -57,7 +57,7 @@ export class Title extends Phaser.Scene {
     if (controls.confirm()) {
       audio.unlock();
       audio.blip();
-      this.scene.start('Intro');
+      this.scene.start('Story');
     }
     controls.endFrame();
   }

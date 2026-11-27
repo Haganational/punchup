@@ -11,6 +11,7 @@ export default {
 
   colors: {
     shirt: '#d8501c', shirtDark: '#9c3008', shirtLight: '#f88048',
+    face: { eyes: [[15, 20], [24, 20]], mouth: [20, 30] },
     body: 'bare', skinLight: '#fcd0b0', chestHair: '#bcbcbc',
     trim: '#d8501c',
     trunks: '#58301c', trunksDark: '#381c0c', stripe: '#d8501c',

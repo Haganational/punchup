@@ -6,7 +6,7 @@ const INK = '#080818';   // the dark outline color around every sprite
 
 // Draw into a new canvas texture. With `outline`, the sprite gets a 1-pixel
 // dark contour (the canvas grows by 1px on each side to make room).
-function canvas(scene, key, w, h, draw, outline = null) {
+export function canvas(scene, key, w, h, draw, outline = null) {
   if (scene.textures.exists(key)) scene.textures.remove(key);
   const pad = outline ? 1 : 0;
   const tex = scene.textures.createCanvas(key, w + pad * 2, h + pad * 2);
@@ -33,7 +33,7 @@ function addOutline(ctx, w, h, color) {
 }
 
 // Small deterministic random generator so the crowd looks the same every time.
-function rng(seed) {
+export function rng(seed) {
   let a = seed;
   return () => {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
@@ -163,6 +163,27 @@ export function makeOpponentBody(scene, key, c) {
   }, INK);
   makeGlove(scene, `glove_${key}`, c.glove, c.gloveDark, c.gloveLight);
   outlineImage(scene, `head_${key}`);
+  if (c.face) makeHitFace(scene, `head_${key}`, c.face, c.skin, c.skinDark);
+}
+
+// The "OH!" face: the same head with wide eyes, raised brows and a round open
+// mouth painted over it. `face` gives the eye and mouth centers in head pixels.
+export function makeHitFace(scene, key, face, skin, skinDark) {
+  const src = scene.textures.get(key).getSourceImage();
+  canvas(scene, `${key}_hit_o`, src.width, src.height, (r, ctx, pad) => {
+    ctx.drawImage(src, pad, pad);
+    face.eyes.forEach(([x, y]) => {
+      r(skin, x - 3, y - 4, 6, 2);                       // lift the brow area
+      r('#281810', x - 3, y - 5, 6, 1);                  // raised eyebrow
+      r(PAL.white, x - 2, y - 2, 5, 4); r(PAL.white, x - 1, y - 3, 3, 6);
+      r('#181018', x - 1, y - 1, 2, 2);
+    });
+    const [mx, my] = face.mouth;
+    r(skin, mx - 6, my - 3, 12, 6);                      // wipe the smile
+    r(skinDark, mx - 3, my - 3, 6, 8); r(skinDark, mx - 4, my - 2, 8, 6);
+    r('#400818', mx - 2, my - 2, 4, 6); r('#400818', mx - 3, my - 1, 6, 4);
+    r('#c03048', mx - 1, my + 1, 2, 2);
+  }, INK);
 }
 
 // Give a loaded image (a pixel-art head) the same dark contour as the drawn sprites.

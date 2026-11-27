@@ -346,6 +346,7 @@ export class Opponent {
     if (zone === 'head') { this.kick.hx = 6 * dir; this.kick.hy = Math.min(this.kick.hy, -3); }
     else { this.kick.by = -4; this.kick.hy = 3; }
     this.tintT = 90;
+    this.ohT = 320;
     (zone === 'head' ? this.head : this.torso).setTintFill(0xfcfcfc);
     if (this.hp <= 0) this.scene.opponentDown();
   }
@@ -441,6 +442,13 @@ export class Opponent {
     // The glove closer to the camera draws on top.
     this.c.bringToTop(c.ls >= c.rs ? this.gl : this.gr);
 
+    // The "OH!" face shows for a beat after every hit, and while dazed or down.
+    if (this.ohT > 0) this.ohT -= dt;
+    if (this.d.colors.face) {
+      const oh = this.ohT > 0 || this.state === 'stunned' || this.state === 'down';
+      const want = `head_${this.d.key}${oh ? '_hit' : ''}_o`;
+      if (this.head.texture.key !== want) this.head.setTexture(want);
+    }
     // Dazed: stars orbit her head. Hurt: her face flushes red.
     const dazed = this.state === 'stunned' || (this.state === 'down' && this.landed_);
     this.dizzy.forEach((d, i) => {
